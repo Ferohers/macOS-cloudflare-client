@@ -2,23 +2,26 @@
 //  ContentView.swift
 //  Flare
 //
-//  Created by Altan Duman on 12.05.2026.
+//  Root view router: setup vs. dashboard
 //
 
 import SwiftUI
 
 struct ContentView: View {
-    var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
-        }
-        .padding()
-    }
-}
+    @Environment(AppState.self) private var appState
 
-#Preview {
-    ContentView()
+    var body: some View {
+        Group {
+            if appState.isAuthenticated {
+                MainDashboardView()
+                    .frame(minWidth: 900, minHeight: 600)
+            } else {
+                SetupView()
+                    .frame(width: 520, height: 460)
+            }
+        }
+        .animation(.easeInOut(duration: 0.3), value: appState.isAuthenticated)
+        .tint(FlareColors.cloudflareOrange)
+        .accentColor(FlareColors.cloudflareOrange)
+    }
 }
