@@ -2,10 +2,11 @@
 //  Theme.swift
 //  Flare
 //
-//  Design system with Cloudflare-inspired dark theme
+//  macOS Tahoe "Liquid Glass" design system
 //
 
 import SwiftUI
+import AppKit
 
 // MARK: - Color Palette
 
@@ -15,12 +16,20 @@ enum FlareColors {
     static let cloudflareOrangeLight = Color(hex: "FBAD41")
     static let cloudflareOrangeDark = Color(hex: "E05D00")
 
-    // Backgrounds
+    // Backgrounds — darker base for glass contrast
     static let bgPrimary = Color(hex: "0D1117")
     static let bgSecondary = Color(hex: "161B22")
     static let bgTertiary = Color(hex: "1C2128")
     static let bgElevated = Color(hex: "21262D")
     static let bgHover = Color(hex: "292E36")
+
+    // Glass surfaces
+    static let glassBackground = Color.white.opacity(0.06)
+    static let glassBorder = Color.white.opacity(0.15)
+    static let glassHighlight = Color.white.opacity(0.25)
+    static let glassHover = Color.white.opacity(0.10)
+    static let glassSurface = Color.white.opacity(0.04)
+    static let glassOverlay = Color.white.opacity(0.08)
 
     // Text
     static let textPrimary = Color(hex: "E6EDF3")
@@ -78,15 +87,405 @@ enum FlareSpacing {
     static let xxxl: CGFloat = 48
 }
 
+// MARK: - Tahoe Squircle Radii
+
 enum FlareRadius {
-    static let sm: CGFloat = 4
-    static let md: CGFloat = 8
-    static let lg: CGFloat = 12
-    static let xl: CGFloat = 16
+    static let sm: CGFloat = 6
+    static let md: CGFloat = 10
+    static let lg: CGFloat = 14       // Nested panels, cards, buttons
+    static let xl: CGFloat = 20
+    static let window: CGFloat = 24   // Main windows, top-level containers
     static let pill: CGFloat = 999
 }
 
-// MARK: - View Modifiers
+// MARK: - Liquid Glass View Modifiers
+
+/// Primary Liquid Glass — for main panels and containers
+struct LiquidGlassModifier: ViewModifier {
+    var cornerRadius: CGFloat = FlareRadius.window
+
+    func body(content: Content) -> some View {
+        content
+            .background(
+                ZStack {
+                    // Base glass material
+                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                        .fill(.ultraThinMaterial)
+
+                    // Glass tint layer
+                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                        .fill(FlareColors.glassBackground)
+
+                    // Top-left light refraction highlight
+                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                        .fill(
+                            LinearGradient(
+                                colors: [
+                                    Color.white.opacity(0.12),
+                                    Color.white.opacity(0.04),
+                                    Color.clear,
+                                    Color.clear
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+
+                    // Edge border with refraction
+                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                        .strokeBorder(
+                            LinearGradient(
+                                colors: [
+                                    Color.white.opacity(0.25),
+                                    Color.white.opacity(0.10),
+                                    Color.white.opacity(0.05),
+                                    Color.white.opacity(0.10)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 0.75
+                        )
+                }
+            )
+    }
+}
+
+/// Nested Glass — for cards and panels inside glass containers
+struct NestedGlassModifier: ViewModifier {
+    var cornerRadius: CGFloat = FlareRadius.lg
+
+    func body(content: Content) -> some View {
+        content
+            .background(
+                ZStack {
+                    // Subtle glass surface
+                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                        .fill(FlareColors.glassOverlay)
+
+                    // Light refraction edge
+                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                        .fill(
+                            LinearGradient(
+                                colors: [
+                                    Color.white.opacity(0.08),
+                                    Color.white.opacity(0.02),
+                                    Color.clear
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+
+                    // Micro-thin edge reflection
+                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                        .strokeBorder(
+                            LinearGradient(
+                                colors: [
+                                    Color.white.opacity(0.18),
+                                    Color.white.opacity(0.06),
+                                    Color.white.opacity(0.03),
+                                    Color.white.opacity(0.08)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 0.5
+                        )
+                }
+            )
+    }
+}
+
+/// Stacked Glass for Stat Cards — with tinted accent glow
+struct StatCardGlassModifier: ViewModifier {
+    var accentColor: Color = FlareColors.statusInfo
+    var cornerRadius: CGFloat = FlareRadius.lg
+
+    func body(content: Content) -> some View {
+        content
+            .background(
+                ZStack {
+                    // Base glass - using glassSurface (less opaque) to reduce grey look
+                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                        .fill(FlareColors.glassSurface)
+
+                    // Tinted accent glow — increased for visual pop
+                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                        .fill(
+                            LinearGradient(
+                                colors: [
+                                    accentColor.opacity(0.15),
+                                    accentColor.opacity(0.04),
+                                    Color.clear
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+
+                    // Top-left light refraction
+                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                        .fill(
+                            LinearGradient(
+                                colors: [
+                                    Color.white.opacity(0.12),
+                                    Color.white.opacity(0.04),
+                                    Color.clear
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+
+                    // Micro-thin edge reflection
+                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                        .strokeBorder(
+                            LinearGradient(
+                                colors: [
+                                    Color.white.opacity(0.28),
+                                    accentColor.opacity(0.18),
+                                    Color.white.opacity(0.06),
+                                    Color.white.opacity(0.14)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 0.75
+                        )
+                }
+            )
+            .shadow(color: accentColor.opacity(0.14), radius: 14, x: 0, y: 4)
+    }
+}
+
+/// Hover Glow — cursor-tracking radial highlight
+struct HoverGlowModifier: ViewModifier {
+    var color: Color = Color.white
+    var radius: CGFloat = 120
+    @State private var hoverLocation: CGPoint = .zero
+    @State private var isHovering = false
+
+    func body(content: Content) -> some View {
+        content
+            .overlay(
+                GeometryReader { geo in
+                    if isHovering {
+                        RadialGradient(
+                            colors: [
+                                color.opacity(0.07),
+                                color.opacity(0.03),
+                                Color.clear
+                            ],
+                            center: UnitPoint(
+                                x: hoverLocation.x / max(geo.size.width, 1),
+                                y: hoverLocation.y / max(geo.size.height, 1)
+                            ),
+                            startRadius: 0,
+                            endRadius: radius
+                        )
+                        .allowsHitTesting(false)
+                    }
+                }
+                .allowsHitTesting(false)
+            )
+            .onContinuousHover { phase in
+                switch phase {
+                case .active(let location):
+                    hoverLocation = location
+                    withAnimation(.easeOut(duration: 0.15)) {
+                        isHovering = true
+                    }
+                case .ended:
+                    withAnimation(.easeOut(duration: 0.3)) {
+                        isHovering = false
+                    }
+                }
+            }
+    }
+}
+
+/// Adaptive Backing — ensures AAA readability against glass
+struct AdaptiveBackingModifier: ViewModifier {
+    var opacity: Double = 0.85
+    var cornerRadius: CGFloat = 0
+
+    func body(content: Content) -> some View {
+        content
+            .background(
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .fill(FlareColors.bgPrimary.opacity(opacity))
+            )
+    }
+}
+
+/// Light Refraction Edge — specular highlight overlay
+struct LightRefractionEdge: ViewModifier {
+    var cornerRadius: CGFloat = FlareRadius.lg
+
+    func body(content: Content) -> some View {
+        content
+            .overlay(
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .strokeBorder(
+                        LinearGradient(
+                            colors: [
+                                Color.white.opacity(0.20),
+                                Color.white.opacity(0.06),
+                                Color.clear,
+                                Color.clear,
+                                Color.white.opacity(0.04)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 0.75
+                    )
+                    .allowsHitTesting(false)
+            )
+    }
+}
+
+/// Sidebar Selection — refractive light highlight carved into glass
+struct GlassSelectionModifier: ViewModifier {
+    var isSelected: Bool
+    var accentColor: Color = FlareColors.cloudflareOrange
+
+    func body(content: Content) -> some View {
+        content
+            .background(
+                Group {
+                    if isSelected {
+                        RoundedRectangle(cornerRadius: FlareRadius.md, style: .continuous)
+                            .fill(
+                                LinearGradient(
+                                    colors: [
+                                        Color.white.opacity(0.16),
+                                        Color.white.opacity(0.08),
+                                        accentColor.opacity(0.12)
+                                    ],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                            .overlay(
+                                RoundedRectangle(cornerRadius: FlareRadius.md, style: .continuous)
+                                    .strokeBorder(
+                                        LinearGradient(
+                                            colors: [
+                                                Color.white.opacity(0.30),
+                                                accentColor.opacity(0.25),
+                                                Color.white.opacity(0.12)
+                                            ],
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        ),
+                                        lineWidth: 0.75
+                                    )
+                            )
+                            .shadow(color: accentColor.opacity(0.20), radius: 10, x: 0, y: 2)
+                    }
+                }
+            )
+    }
+}
+
+/// Glass Footer — slightly more opaque glass element
+struct GlassFooterModifier: ViewModifier {
+    var cornerRadius: CGFloat = FlareRadius.lg
+
+    func body(content: Content) -> some View {
+        content
+            .background(
+                ZStack {
+                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                        .fill(.thinMaterial)
+
+                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                        .fill(FlareColors.cloudflareOrange.opacity(0.15))
+
+                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                        .strokeBorder(
+                            LinearGradient(
+                                colors: [
+                                    Color.white.opacity(0.18),
+                                    Color.white.opacity(0.06),
+                                    Color.white.opacity(0.08)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 0.5
+                        )
+                }
+            )
+    }
+}
+
+/// Liquid Glass Button
+struct LiquidGlassButtonModifier: ViewModifier {
+    var color: Color? = nil
+    var isPrimary: Bool
+    var cornerRadius: CGFloat = FlareRadius.lg
+    
+    func body(content: Content) -> some View {
+        let baseColor = color ?? (isPrimary ? FlareColors.cloudflareOrange : FlareColors.glassOverlay)
+        let isColorCustom = color != nil
+        
+        content
+            .background(
+                ZStack {
+                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                        .fill(baseColor)
+                    
+                    if isPrimary || isColorCustom {
+                        // Glossy overlay for primary or colored buttons
+                        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                            .fill(
+                                LinearGradient(
+                                    colors: [Color.white.opacity(0.20), Color.clear],
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                )
+                            )
+                    } else {
+                        // Glass refraction for secondary button
+                        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                            .fill(
+                                LinearGradient(
+                                    colors: [Color.white.opacity(0.12), Color.clear],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                    }
+                    
+                    // Refractive Edge
+                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                        .strokeBorder(
+                            LinearGradient(
+                                colors: [
+                                    Color.white.opacity(0.3),
+                                    Color.white.opacity(0.08),
+                                    Color.clear
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 0.5
+                        )
+                }
+            )
+            .shadow(
+                color: (color ?? (isPrimary ? FlareColors.cloudflareOrange : Color.black)).opacity(0.4),
+                radius: (isPrimary || isColorCustom) ? 8 : 4,
+                x: 0,
+                y: (isPrimary || isColorCustom) ? 3 : 2
+            )
+    }
+}
+
+// MARK: - Old Modifier Compatibility (CardStyle, GlassStyle, GlowEffect)
 
 struct CardStyle: ViewModifier {
     var isHovered: Bool = false
@@ -94,12 +493,38 @@ struct CardStyle: ViewModifier {
     func body(content: Content) -> some View {
         content
             .background(
-                RoundedRectangle(cornerRadius: FlareRadius.lg)
-                    .fill(isHovered ? FlareColors.bgHover : FlareColors.bgSecondary)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: FlareRadius.lg)
-                            .strokeBorder(FlareColors.borderPrimary, lineWidth: 1)
-                    )
+                ZStack {
+                    RoundedRectangle(cornerRadius: FlareRadius.lg, style: .continuous)
+                        .fill(isHovered ? FlareColors.glassHover : FlareColors.glassOverlay)
+
+                    RoundedRectangle(cornerRadius: FlareRadius.lg, style: .continuous)
+                        .fill(
+                            LinearGradient(
+                                colors: [
+                                    Color.white.opacity(isHovered ? 0.10 : 0.06),
+                                    Color.white.opacity(0.02),
+                                    Color.clear
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+
+                    RoundedRectangle(cornerRadius: FlareRadius.lg, style: .continuous)
+                        .strokeBorder(
+                            LinearGradient(
+                                colors: [
+                                    Color.white.opacity(0.18),
+                                    Color.white.opacity(0.06),
+                                    Color.white.opacity(0.03),
+                                    Color.white.opacity(0.08)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 0.5
+                        )
+                }
             )
             .animation(.easeInOut(duration: 0.15), value: isHovered)
     }
@@ -108,14 +533,7 @@ struct CardStyle: ViewModifier {
 struct GlassStyle: ViewModifier {
     func body(content: Content) -> some View {
         content
-            .background(
-                RoundedRectangle(cornerRadius: FlareRadius.lg)
-                    .fill(.ultraThinMaterial)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: FlareRadius.lg)
-                            .strokeBorder(FlareColors.borderPrimary.opacity(0.5), lineWidth: 1)
-                    )
-            )
+            .modifier(LiquidGlassModifier(cornerRadius: FlareRadius.lg))
     }
 }
 
@@ -129,7 +547,45 @@ struct GlowEffect: ViewModifier {
     }
 }
 
+// MARK: - View Extensions
+
 extension View {
+    func liquidGlass(cornerRadius: CGFloat = FlareRadius.window) -> some View {
+        modifier(LiquidGlassModifier(cornerRadius: cornerRadius))
+    }
+
+    func nestedGlass(cornerRadius: CGFloat = FlareRadius.lg) -> some View {
+        modifier(NestedGlassModifier(cornerRadius: cornerRadius))
+    }
+
+    func statCardGlass(accentColor: Color = FlareColors.statusInfo) -> some View {
+        modifier(StatCardGlassModifier(accentColor: accentColor))
+    }
+
+    func hoverGlow(color: Color = .white, radius: CGFloat = 120) -> some View {
+        modifier(HoverGlowModifier(color: color, radius: radius))
+    }
+
+    func adaptiveBacking(opacity: Double = 0.85, cornerRadius: CGFloat = 0) -> some View {
+        modifier(AdaptiveBackingModifier(opacity: opacity, cornerRadius: cornerRadius))
+    }
+
+    func lightRefractionEdge(cornerRadius: CGFloat = FlareRadius.lg) -> some View {
+        modifier(LightRefractionEdge(cornerRadius: cornerRadius))
+    }
+
+    func glassSelection(isSelected: Bool, accentColor: Color = FlareColors.cloudflareOrange) -> some View {
+        modifier(GlassSelectionModifier(isSelected: isSelected, accentColor: accentColor))
+    }
+
+    func glassFooter(cornerRadius: CGFloat = FlareRadius.lg) -> some View {
+        modifier(GlassFooterModifier(cornerRadius: cornerRadius))
+    }
+
+    func liquidGlassButton(color: Color? = nil, isPrimary: Bool = false, cornerRadius: CGFloat = FlareRadius.lg) -> some View {
+        modifier(LiquidGlassButtonModifier(color: color, isPrimary: isPrimary, cornerRadius: cornerRadius))
+    }
+
     func cardStyle(isHovered: Bool = false) -> some View {
         modifier(CardStyle(isHovered: isHovered))
     }

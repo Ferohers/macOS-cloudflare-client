@@ -2,7 +2,7 @@
 //  Components.swift
 //  Flare
 //
-//  Reusable UI components for the Flare app
+//  Reusable UI components — macOS Tahoe Liquid Glass design
 //
 
 import SwiftUI
@@ -37,6 +37,7 @@ struct StatusBadge: View {
             Circle()
                 .fill(color)
                 .frame(width: 6, height: 6)
+                .shadow(color: color.opacity(0.5), radius: 3, x: 0, y: 0)
             Text(text)
                 .font(.system(size: 11, weight: .medium))
                 .foregroundStyle(color)
@@ -45,27 +46,36 @@ struct StatusBadge: View {
         .padding(.vertical, 3)
         .background(
             Capsule()
-                .fill(color.opacity(0.12))
+                .fill(color.opacity(0.10))
+                .overlay(
+                    Capsule()
+                        .strokeBorder(color.opacity(0.15), lineWidth: 0.5)
+                )
         )
         .fixedSize(horizontal: true, vertical: false)
     }
 }
 
-// MARK: - DNS Type Badge
+// MARK: - DNS Type Badge — Translucent Glass
 
 struct DNSTypeBadge: View {
     let type: String
 
     var body: some View {
+        let badgeColor = FlareColors.colorForDNSType(type)
         Text(type)
             .font(.system(size: 10, weight: .bold, design: .monospaced))
-            .foregroundStyle(.white)
+            .foregroundStyle(badgeColor)
             .padding(.horizontal, 6)
             .padding(.vertical, 2)
             .frame(minWidth: 48)
             .background(
-                RoundedRectangle(cornerRadius: FlareRadius.sm)
-                    .fill(FlareColors.colorForDNSType(type))
+                RoundedRectangle(cornerRadius: FlareRadius.sm, style: .continuous)
+                    .fill(badgeColor.opacity(0.15))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: FlareRadius.sm, style: .continuous)
+                            .strokeBorder(badgeColor.opacity(0.25), lineWidth: 0.5)
+                    )
             )
     }
 }
@@ -79,35 +89,40 @@ struct ProxyStatusIcon: View {
         Image(systemName: "cloud.fill")
             .font(.system(size: 14))
             .foregroundStyle(isProxied ? FlareColors.cloudflareOrange : FlareColors.textTertiary)
+            .shadow(color: isProxied ? FlareColors.cloudflareOrange.opacity(0.3) : Color.clear, radius: 4, x: 0, y: 0)
             .help(isProxied ? "Proxied through Cloudflare" : "DNS Only")
     }
 }
 
-// MARK: - Loading Skeleton
+// MARK: - Loading Skeleton — Glass Shimmer
 
 struct LoadingCard: View {
     @State private var isAnimating = false
 
     var body: some View {
-        RoundedRectangle(cornerRadius: FlareRadius.lg)
-            .fill(FlareColors.bgSecondary)
+        RoundedRectangle(cornerRadius: FlareRadius.lg, style: .continuous)
+            .fill(FlareColors.glassOverlay)
             .overlay(
-                RoundedRectangle(cornerRadius: FlareRadius.lg)
+                RoundedRectangle(cornerRadius: FlareRadius.lg, style: .continuous)
                     .fill(
                         LinearGradient(
                             colors: [
-                                FlareColors.bgSecondary,
-                                FlareColors.bgTertiary.opacity(0.5),
-                                FlareColors.bgSecondary
+                                Color.white.opacity(0.02),
+                                Color.white.opacity(0.06),
+                                Color.white.opacity(0.02)
                             ],
                             startPoint: isAnimating ? .trailing : .leading,
                             endPoint: isAnimating ? .leading : .trailing
                         )
                     )
             )
+            .overlay(
+                RoundedRectangle(cornerRadius: FlareRadius.lg, style: .continuous)
+                    .strokeBorder(FlareColors.glassBorder.opacity(0.5), lineWidth: 0.5)
+            )
             .frame(height: 72)
             .onAppear {
-                withAnimation(.easeInOut(duration: 1.2).repeatForever(autoreverses: true)) {
+                withAnimation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true)) {
                     isAnimating = true
                 }
             }
@@ -143,17 +158,17 @@ struct ErrorBanner: View {
         }
         .padding(FlareSpacing.md)
         .background(
-            RoundedRectangle(cornerRadius: FlareRadius.md)
-                .fill(FlareColors.statusError.opacity(0.1))
+            RoundedRectangle(cornerRadius: FlareRadius.md, style: .continuous)
+                .fill(FlareColors.statusError.opacity(0.08))
                 .overlay(
-                    RoundedRectangle(cornerRadius: FlareRadius.md)
-                        .strokeBorder(FlareColors.statusError.opacity(0.3), lineWidth: 1)
+                    RoundedRectangle(cornerRadius: FlareRadius.md, style: .continuous)
+                        .strokeBorder(FlareColors.statusError.opacity(0.2), lineWidth: 0.5)
                 )
         )
     }
 }
 
-// MARK: - Toast Banner (bottom notification with auto-dismiss)
+// MARK: - Toast Banner — Glass notification
 
 struct ToastBanner: View {
     let message: String
@@ -166,6 +181,7 @@ struct ToastBanner: View {
             Image(systemName: isError ? "exclamationmark.triangle.fill" : "checkmark.circle.fill")
                 .font(.system(size: 14))
                 .foregroundStyle(isError ? FlareColors.statusError : FlareColors.statusActive)
+                .shadow(color: (isError ? FlareColors.statusError : FlareColors.statusActive).opacity(0.4), radius: 4, x: 0, y: 0)
 
             Text(message)
                 .font(.system(size: 12, weight: .medium))
@@ -186,8 +202,12 @@ struct ToastBanner: View {
                     .padding(.horizontal, FlareSpacing.sm)
                     .padding(.vertical, FlareSpacing.xs + 1)
                     .background(
-                        RoundedRectangle(cornerRadius: FlareRadius.sm)
-                            .fill(isHoveringClose ? FlareColors.bgHover : FlareColors.bgElevated)
+                        RoundedRectangle(cornerRadius: FlareRadius.sm, style: .continuous)
+                            .fill(isHoveringClose ? FlareColors.glassHover : FlareColors.glassOverlay)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: FlareRadius.sm, style: .continuous)
+                                    .strokeBorder(Color.white.opacity(0.1), lineWidth: 0.5)
+                            )
                     )
                 }
                 .buttonStyle(.plain)
@@ -198,18 +218,46 @@ struct ToastBanner: View {
         }
         .padding(FlareSpacing.md)
         .background(
-            RoundedRectangle(cornerRadius: FlareRadius.lg)
-                .fill(FlareColors.bgSecondary)
-                .overlay(
-                    RoundedRectangle(cornerRadius: FlareRadius.lg)
-                        .strokeBorder(isError ? FlareColors.statusError.opacity(0.3) : FlareColors.statusActive.opacity(0.3), lineWidth: 1)
-                )
+            ZStack {
+                RoundedRectangle(cornerRadius: FlareRadius.lg, style: .continuous)
+                    .fill(.ultraThinMaterial)
+
+                RoundedRectangle(cornerRadius: FlareRadius.lg, style: .continuous)
+                    .fill(FlareColors.glassOverlay)
+
+                // Light refraction edge
+                RoundedRectangle(cornerRadius: FlareRadius.lg, style: .continuous)
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                Color.white.opacity(0.08),
+                                Color.clear
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+
+                RoundedRectangle(cornerRadius: FlareRadius.lg, style: .continuous)
+                    .strokeBorder(
+                        LinearGradient(
+                            colors: [
+                                Color.white.opacity(0.18),
+                                (isError ? FlareColors.statusError : FlareColors.statusActive).opacity(0.15),
+                                Color.white.opacity(0.05)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 0.5
+                    )
+            }
         )
-        .shadow(color: .black.opacity(0.3), radius: 20, y: -5)
+        .shadow(color: .black.opacity(0.4), radius: 24, y: -6)
     }
 }
 
-// MARK: - Stat Card
+// MARK: - Stat Card — Stacked Glass with Accent Glow
 
 struct StatCard: View {
     let title: String
@@ -218,32 +266,34 @@ struct StatCard: View {
     var iconColor: Color = FlareColors.cloudflareOrange
 
     var body: some View {
-        VStack(alignment: .leading, spacing: FlareSpacing.sm) {
-            HStack {
-                Image(systemName: icon)
-                    .font(.system(size: 14))
-                    .foregroundStyle(iconColor)
-                Spacer()
+        HStack(spacing: FlareSpacing.md) {
+            // Icon — small, tinted
+            Image(systemName: icon)
+                .font(.system(size: 13, weight: .medium))
+                .foregroundStyle(iconColor)
+                .shadow(color: iconColor.opacity(0.4), radius: 3, x: 0, y: 0)
+                .frame(width: 28, height: 28)
+                .background(
+                    RoundedRectangle(cornerRadius: FlareRadius.sm, style: .continuous)
+                        .fill(iconColor.opacity(0.10))
+                )
+
+            VStack(alignment: .leading, spacing: 1) {
+                Text(value)
+                    .font(.system(size: 17, weight: .bold, design: .rounded))
+                    .foregroundStyle(FlareColors.textPrimary)
+
+                Text(title)
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(FlareColors.textPrimary)
             }
 
-            Text(value)
-                .font(.system(size: 24, weight: .bold, design: .rounded))
-                .foregroundStyle(FlareColors.textPrimary)
-
-            Text(title)
-                .font(.system(size: 11, weight: .medium))
-                .foregroundStyle(FlareColors.textSecondary)
+            Spacer()
         }
-        .padding(FlareSpacing.lg)
+        .padding(.horizontal, FlareSpacing.md)
+        .padding(.vertical, FlareSpacing.sm + 2)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(
-            RoundedRectangle(cornerRadius: FlareRadius.lg)
-                .fill(FlareColors.bgSecondary)
-                .overlay(
-                    RoundedRectangle(cornerRadius: FlareRadius.lg)
-                        .strokeBorder(FlareColors.borderPrimary, lineWidth: 1)
-                )
-        )
+        .statCardGlass(accentColor: iconColor)
     }
 }
 
@@ -261,6 +311,7 @@ struct SectionHeader: View {
                 Text(title)
                     .font(.system(size: 18, weight: .semibold))
                     .foregroundStyle(FlareColors.textPrimary)
+                    .tracking(0.3)
 
                 if let subtitle = subtitle {
                     Text(subtitle)
@@ -298,7 +349,8 @@ struct EmptyStateView: View {
         VStack(spacing: FlareSpacing.lg) {
             Image(systemName: icon)
                 .font(.system(size: 40, weight: .light))
-                .foregroundStyle(FlareColors.textTertiary)
+                .foregroundStyle(FlareColors.textTertiary.opacity(0.6))
+                .shadow(color: FlareColors.textTertiary.opacity(0.1), radius: 8, x: 0, y: 0)
 
             Text(title)
                 .font(.system(size: 16, weight: .semibold))

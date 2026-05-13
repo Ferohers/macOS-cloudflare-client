@@ -2,7 +2,7 @@
 //  ZoneDetailView.swift
 //  Flare
 //
-//  Zone detail with DNS records table, stats, and zone info
+//  Zone detail with glass stat cards, hover-glow DNS table, and adaptive backings
 //
 
 import SwiftUI
@@ -60,7 +60,7 @@ struct ZoneDetailView: View {
             zoneHeader
 
             Divider()
-                .background(FlareColors.borderPrimary)
+                .background(FlareColors.glassBorder)
 
             // Stats row
             statsRow
@@ -87,6 +87,7 @@ struct ZoneDetailView: View {
                     Text(zone.name)
                         .font(.system(size: 20, weight: .bold))
                         .foregroundStyle(FlareColors.textPrimary)
+                        .tracking(0.3)
 
                     StatusBadge(zoneStatus: zone.status)
 
@@ -120,14 +121,11 @@ struct ZoneDetailView: View {
                     showAddSheet = true
                 }) {
                     Text("Add")
-                        .font(.system(size: 12, weight: .medium))
+                        .font(.system(size: 12, weight: .semibold))
                         .foregroundStyle(.white)
                         .padding(.horizontal, FlareSpacing.md)
                         .padding(.vertical, FlareSpacing.sm)
-                        .background(
-                            RoundedRectangle(cornerRadius: FlareRadius.md)
-                                .fill(FlareColors.cloudflareOrange)
-                        )
+                        .liquidGlassButton(isPrimary: true)
                 }
                 .buttonStyle(.plain)
             }
@@ -135,7 +133,7 @@ struct ZoneDetailView: View {
         .padding(FlareSpacing.lg)
     }
 
-    // MARK: - Stats Row
+    // MARK: - Stats Row — Stacked Glass Cards
 
     private var statsRow: some View {
         HStack(spacing: FlareSpacing.md) {
@@ -147,7 +145,7 @@ struct ZoneDetailView: View {
             )
 
             StatCard(
-                title: "Proxied",
+                title: "Proxied Records",
                 value: "\(appState.dnsRecords.filter(\.isProxied).count)",
                 icon: "cloud.fill",
                 iconColor: FlareColors.cloudflareOrange
@@ -162,7 +160,7 @@ struct ZoneDetailView: View {
 
             if let nameservers = zone.name_servers, !nameservers.isEmpty {
                 StatCard(
-                    title: "Nameservers",
+                    title: "Name Servers",
                     value: "\(nameservers.count)",
                     icon: "server.rack",
                     iconColor: FlareColors.statusActive
@@ -181,6 +179,7 @@ struct ZoneDetailView: View {
                 Text("DNS Records")
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundStyle(FlareColors.textPrimary)
+                    .tracking(0.3)
 
                 Spacer()
 
@@ -202,7 +201,7 @@ struct ZoneDetailView: View {
                 .pickerStyle(.menu)
                 .fixedSize()
 
-                // Search
+                // Search — glass-backed
                 HStack(spacing: FlareSpacing.xs) {
                     Image(systemName: "magnifyingglass")
                         .font(.system(size: 10))
@@ -217,11 +216,11 @@ struct ZoneDetailView: View {
                 .padding(.horizontal, FlareSpacing.sm)
                 .padding(.vertical, FlareSpacing.xs)
                 .background(
-                    RoundedRectangle(cornerRadius: FlareRadius.sm)
-                        .fill(FlareColors.bgTertiary)
+                    RoundedRectangle(cornerRadius: FlareRadius.sm, style: .continuous)
+                        .fill(FlareColors.glassOverlay)
                         .overlay(
-                            RoundedRectangle(cornerRadius: FlareRadius.sm)
-                                .strokeBorder(FlareColors.borderPrimary, lineWidth: 1)
+                            RoundedRectangle(cornerRadius: FlareRadius.sm, style: .continuous)
+                                .strokeBorder(FlareColors.glassBorder, lineWidth: 0.5)
                         )
                 )
             }
@@ -229,7 +228,7 @@ struct ZoneDetailView: View {
             .padding(.vertical, FlareSpacing.md)
 
             Divider()
-                .background(FlareColors.borderPrimary)
+                .background(FlareColors.glassBorder)
 
             // Table Headers
             HStack(spacing: 0) {
@@ -241,12 +240,12 @@ struct ZoneDetailView: View {
             }
             .padding(.horizontal, FlareSpacing.lg)
             .padding(.vertical, FlareSpacing.sm)
-            .background(FlareColors.bgSecondary)
+            .background(FlareColors.glassOverlay)
 
             Divider()
-                .background(FlareColors.borderPrimary)
+                .background(FlareColors.glassBorder)
 
-            // Table Content
+            // Table Content with hover-glow
             if appState.isLoadingDNS && appState.dnsRecords.isEmpty {
                 ScrollView {
                     VStack(spacing: FlareSpacing.sm) {
@@ -269,17 +268,43 @@ struct ZoneDetailView: View {
                     LazyVStack(spacing: 0) {
                         ForEach(filteredRecords) { record in
                             dnsRow(record)
-                                .background(hoveredRecordId == record.id ? FlareColors.bgHover : Color.clear)
+                                .adaptiveBacking(
+                                    opacity: hoveredRecordId == record.id ? 0.80 : 0.72,
+                                    cornerRadius: 0
+                                )
+                                .overlay(
+                                    // Hover glow effect per row
+                                    Group {
+                                        if hoveredRecordId == record.id {
+                                            Rectangle()
+                                                .fill(
+                                                    LinearGradient(
+                                                        colors: [
+                                                            Color.white.opacity(0.04),
+                                                            Color.white.opacity(0.02),
+                                                            Color.clear
+                                                        ],
+                                                        startPoint: .leading,
+                                                        endPoint: .trailing
+                                                    )
+                                                )
+                                                .allowsHitTesting(false)
+                                        }
+                                    }
+                                )
                                 .onHover { hovering in
-                                    hoveredRecordId = hovering ? record.id : nil
+                                    withAnimation(.easeOut(duration: 0.15)) {
+                                        hoveredRecordId = hovering ? record.id : nil
+                                    }
                                 }
                                 .onTapGesture {
                                     selectedRecord = record
                                 }
                             Divider()
-                                .background(FlareColors.borderSecondary)
+                                .background(FlareColors.borderSecondary.opacity(0.5))
                         }
                     }
+                    .hoverGlow(color: .white, radius: 150)
                 }
             }
         }
@@ -290,19 +315,20 @@ struct ZoneDetailView: View {
             .font(.system(size: 10, weight: .semibold))
             .foregroundStyle(FlareColors.textTertiary)
             .textCase(.uppercase)
+            .tracking(0.5)
             .frame(width: width, alignment: .leading)
             .frame(maxWidth: flex ? .infinity : nil, alignment: .leading)
     }
 
     private func dnsRow(_ record: DNSRecord) -> some View {
         HStack(spacing: 0) {
-            // Type badge
+            // Type badge — translucent glass
             DNSTypeBadge(type: record.type)
                 .frame(width: 70, alignment: .leading)
 
             // Name
             Text(record.displayName)
-                .font(.system(size: 12, design: .monospaced))
+                .font(.system(size: 12, weight: .regular, design: .monospaced))
                 .foregroundStyle(FlareColors.textPrimary)
                 .lineLimit(1)
                 .truncationMode(.middle)

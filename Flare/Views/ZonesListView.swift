@@ -2,7 +2,7 @@
 //  ZonesListView.swift
 //  Flare
 //
-//  Zones list with search, filtering, and zone cards
+//  Zones list with glass cards — macOS Tahoe Liquid Glass
 //
 
 import SwiftUI
@@ -37,7 +37,7 @@ struct ZonesListView: View {
             .padding(.top, FlareSpacing.lg)
             .padding(.bottom, FlareSpacing.md)
 
-            // Search
+            // Search — glass-backed
             HStack(spacing: FlareSpacing.sm) {
                 Image(systemName: "magnifyingglass")
                     .font(.system(size: 12))
@@ -59,11 +59,11 @@ struct ZonesListView: View {
             }
             .padding(FlareSpacing.sm)
             .background(
-                RoundedRectangle(cornerRadius: FlareRadius.md)
-                    .fill(FlareColors.bgTertiary)
+                RoundedRectangle(cornerRadius: FlareRadius.md, style: .continuous)
+                    .fill(FlareColors.glassOverlay)
                     .overlay(
-                        RoundedRectangle(cornerRadius: FlareRadius.md)
-                            .strokeBorder(FlareColors.borderPrimary, lineWidth: 1)
+                        RoundedRectangle(cornerRadius: FlareRadius.md, style: .continuous)
+                            .strokeBorder(FlareColors.glassBorder, lineWidth: 0.5)
                     )
             )
             .padding(.horizontal, FlareSpacing.lg)
@@ -112,7 +112,7 @@ struct ZonesListView: View {
     }
 }
 
-// MARK: - Zone Row
+// MARK: - Zone Row — Glass Card
 
 struct ZoneRow: View {
     let zone: Zone
@@ -122,11 +122,11 @@ struct ZoneRow: View {
     var body: some View {
         HStack(spacing: FlareSpacing.md) {
             // Zone icon
-            RoundedRectangle(cornerRadius: FlareRadius.sm)
+            RoundedRectangle(cornerRadius: FlareRadius.sm, style: .continuous)
                 .fill(
                     zone.isActive
-                        ? FlareColors.statusActive.opacity(0.15)
-                        : FlareColors.statusPending.opacity(0.15)
+                        ? FlareColors.statusActive.opacity(0.12)
+                        : FlareColors.statusPending.opacity(0.12)
                 )
                 .frame(width: 36, height: 36)
                 .overlay(
@@ -135,6 +135,7 @@ struct ZoneRow: View {
                         .foregroundStyle(
                             zone.isActive ? FlareColors.statusActive : FlareColors.statusPending
                         )
+                        .shadow(color: (zone.isActive ? FlareColors.statusActive : FlareColors.statusPending).opacity(0.3), radius: 3)
                 )
 
             VStack(alignment: .leading, spacing: 2) {
@@ -162,21 +163,41 @@ struct ZoneRow: View {
         }
         .padding(FlareSpacing.md)
         .background(
-            RoundedRectangle(cornerRadius: FlareRadius.lg)
-                .fill(
-                    isSelected
-                        ? FlareColors.cloudflareOrange.opacity(0.08)
-                        : (isHovered ? FlareColors.bgHover : FlareColors.bgSecondary)
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: FlareRadius.lg)
-                        .strokeBorder(
-                            isSelected
-                                ? FlareColors.cloudflareOrange.opacity(0.3)
-                                : FlareColors.borderPrimary,
-                            lineWidth: 1
+            ZStack {
+                RoundedRectangle(cornerRadius: FlareRadius.lg, style: .continuous)
+                    .fill(
+                        isSelected
+                            ? FlareColors.cloudflareOrange.opacity(0.06)
+                            : (isHovered ? FlareColors.glassHover : FlareColors.glassOverlay)
+                    )
+
+                // Light refraction on selected
+                if isSelected {
+                    RoundedRectangle(cornerRadius: FlareRadius.lg, style: .continuous)
+                        .fill(
+                            LinearGradient(
+                                colors: [
+                                    Color.white.opacity(0.08),
+                                    Color.clear
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
                         )
-                )
+                }
+
+                RoundedRectangle(cornerRadius: FlareRadius.lg, style: .continuous)
+                    .strokeBorder(
+                        LinearGradient(
+                            colors: isSelected
+                                ? [FlareColors.cloudflareOrange.opacity(0.3), Color.white.opacity(0.08)]
+                                : [Color.white.opacity(0.12), Color.white.opacity(0.04)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 0.5
+                    )
+            }
         )
         .contentShape(Rectangle())
         .animation(.easeInOut(duration: 0.12), value: isSelected)

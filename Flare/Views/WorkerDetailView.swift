@@ -2,6 +2,8 @@
 //  WorkerDetailView.swift
 //  Flare
 //
+//  Worker editor with Liquid Glass frame and solid dark code canvas
+//
 
 import SwiftUI
 
@@ -12,13 +14,14 @@ struct WorkerDetailView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Header
+            // Header — glass frame
             HStack(spacing: FlareSpacing.lg) {
                 VStack(alignment: .leading, spacing: FlareSpacing.xs) {
                     HStack(spacing: FlareSpacing.sm) {
                         Text(worker.displayName)
                             .font(.system(size: 20, weight: .bold))
                             .foregroundStyle(FlareColors.textPrimary)
+                            .tracking(0.3)
 
                         Button(action: {
                             Task {
@@ -59,68 +62,79 @@ struct WorkerDetailView: View {
 
                 Spacer()
 
-                // Actions
+                // Actions — squircle glass buttons
                 HStack(spacing: FlareSpacing.sm) {
                     Button(action: {
-                        // Dummy Cancel
+                        // Cancel
                     }) {
                         Text("Cancel")
                             .font(.system(size: 12, weight: .medium))
                             .foregroundStyle(FlareColors.textPrimary)
                             .padding(.horizontal, FlareSpacing.md)
                             .padding(.vertical, FlareSpacing.sm)
-                            .background(
-                                RoundedRectangle(cornerRadius: FlareRadius.md)
-                                    .fill(FlareColors.bgTertiary)
-                            )
+                            .liquidGlassButton(isPrimary: false)
                     }
                     .buttonStyle(.plain)
 
                     Button(action: {
-                        // Dummy Save
+                        // Save & Deploy
                     }) {
                         Text("Save & Deploy")
-                            .font(.system(size: 12, weight: .medium))
+                            .font(.system(size: 12, weight: .semibold))
                             .foregroundStyle(.white)
                             .padding(.horizontal, FlareSpacing.md)
                             .padding(.vertical, FlareSpacing.sm)
-                            .background(
-                                RoundedRectangle(cornerRadius: FlareRadius.md)
-                                    .fill(FlareColors.cloudflareOrange)
-                            )
+                            .liquidGlassButton(isPrimary: true)
                     }
                     .buttonStyle(.plain)
                 }
             }
             .padding(FlareSpacing.lg)
+            .background(
+                // Glass header backing
+                ZStack {
+                    Rectangle()
+                        .fill(FlareColors.glassOverlay)
+                    LinearGradient(
+                        colors: [
+                            Color.white.opacity(0.05),
+                            Color.clear
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                }
+            )
 
             Divider()
-                .background(FlareColors.borderPrimary)
+                .background(FlareColors.glassBorder)
 
-            // Code Editor
+            // Code Editor — solid dark canvas for clarity
             HStack(spacing: 0) {
-                // Line numbers
+                // Line numbers — subtle glass gutter
                 VStack(alignment: .trailing, spacing: 4) {
                     ForEach(1..<20, id: \.self) { line in
                         Text("\(line)")
                             .font(.system(size: 12, design: .monospaced))
-                            .foregroundStyle(FlareColors.textTertiary)
+                            .foregroundStyle(FlareColors.textTertiary.opacity(0.7))
                     }
                     Spacer()
                 }
                 .padding(.top, FlareSpacing.md)
                 .padding(.horizontal, FlareSpacing.sm)
-                .background(FlareColors.bgTertiary)
+                .background(FlareColors.bgTertiary.opacity(0.8))
                 
-                Divider()
-                    .background(FlareColors.borderPrimary)
+                // Subtle glass divider
+                Rectangle()
+                    .fill(FlareColors.glassBorder)
+                    .frame(width: 0.5)
                 
-                // Code content
+                // Code content — solid dark for maximum readability
                 TextEditor(text: $code)
                     .font(.system(size: 12, design: .monospaced))
                     .foregroundStyle(FlareColors.textPrimary)
                     .scrollContentBackground(.hidden)
-                    .background(FlareColors.bgSecondary)
+                    .background(FlareColors.bgPrimary)
                     .padding(.horizontal, FlareSpacing.sm)
                     .padding(.top, 4)
             }

@@ -2,7 +2,7 @@
 //  WorkersListView.swift
 //  Flare
 //
-//  Workers scripts list with search and script cards
+//  Workers scripts list with glass cards — macOS Tahoe Liquid Glass
 //
 
 import SwiftUI
@@ -36,7 +36,7 @@ struct WorkersListView: View {
             .padding(.top, FlareSpacing.lg)
             .padding(.bottom, FlareSpacing.md)
 
-            // Search
+            // Search — glass-backed
             HStack(spacing: FlareSpacing.sm) {
                 Image(systemName: "magnifyingglass")
                     .font(.system(size: 12))
@@ -58,11 +58,11 @@ struct WorkersListView: View {
             }
             .padding(FlareSpacing.sm)
             .background(
-                RoundedRectangle(cornerRadius: FlareRadius.md)
-                    .fill(FlareColors.bgTertiary)
+                RoundedRectangle(cornerRadius: FlareRadius.md, style: .continuous)
+                    .fill(FlareColors.glassOverlay)
                     .overlay(
-                        RoundedRectangle(cornerRadius: FlareRadius.md)
-                            .strokeBorder(FlareColors.borderPrimary, lineWidth: 1)
+                        RoundedRectangle(cornerRadius: FlareRadius.md, style: .continuous)
+                            .strokeBorder(FlareColors.glassBorder, lineWidth: 0.5)
                     )
             )
             .padding(.horizontal, FlareSpacing.xl)
@@ -118,7 +118,7 @@ struct WorkersListView: View {
     }
 }
 
-// MARK: - Worker Row
+// MARK: - Worker Row — Glass Card
 
 struct WorkerRow: View {
     let worker: WorkerScript
@@ -127,13 +127,14 @@ struct WorkerRow: View {
     var body: some View {
         HStack(spacing: FlareSpacing.md) {
             // Icon
-            RoundedRectangle(cornerRadius: FlareRadius.sm)
-                .fill(FlareColors.statusInfo.opacity(0.15))
+            RoundedRectangle(cornerRadius: FlareRadius.sm, style: .continuous)
+                .fill(FlareColors.statusInfo.opacity(0.12))
                 .frame(width: 36, height: 36)
                 .overlay(
                     Image(systemName: "chevron.left.forwardslash.chevron.right")
                         .font(.system(size: 13, weight: .medium))
                         .foregroundStyle(FlareColors.statusInfo)
+                        .shadow(color: FlareColors.statusInfo.opacity(0.3), radius: 3)
                 )
 
             // Name and metadata
@@ -181,12 +182,38 @@ struct WorkerRow: View {
         }
         .padding(FlareSpacing.md)
         .background(
-            RoundedRectangle(cornerRadius: FlareRadius.lg)
-                .fill(isHovered ? FlareColors.bgHover : FlareColors.bgSecondary)
-                .overlay(
-                    RoundedRectangle(cornerRadius: FlareRadius.lg)
-                        .strokeBorder(FlareColors.borderPrimary, lineWidth: 1)
-                )
+            ZStack {
+                RoundedRectangle(cornerRadius: FlareRadius.lg, style: .continuous)
+                    .fill(isHovered ? FlareColors.glassHover : FlareColors.glassOverlay)
+
+                // Light refraction on hover
+                if isHovered {
+                    RoundedRectangle(cornerRadius: FlareRadius.lg, style: .continuous)
+                        .fill(
+                            LinearGradient(
+                                colors: [
+                                    Color.white.opacity(0.06),
+                                    Color.clear
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                }
+
+                RoundedRectangle(cornerRadius: FlareRadius.lg, style: .continuous)
+                    .strokeBorder(
+                        LinearGradient(
+                            colors: [
+                                Color.white.opacity(0.14),
+                                Color.white.opacity(0.04)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 0.5
+                    )
+            }
         )
         .contentShape(Rectangle())
         .animation(.easeInOut(duration: 0.12), value: isHovered)

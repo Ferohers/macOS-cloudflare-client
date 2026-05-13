@@ -2,7 +2,7 @@
 //  PermissionsInspectorView.swift
 //  Flare
 //
-//  Sheet that shows all required Cloudflare API permissions with live green/red status
+//  Sheet that shows all required Cloudflare API permissions — Liquid Glass
 //
 
 import SwiftUI
@@ -13,12 +13,13 @@ struct PermissionsInspectorView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Header
+            // Header — glass
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("API Permissions")
                         .font(.system(size: 16, weight: .bold))
                         .foregroundStyle(FlareColors.textPrimary)
+                        .tracking(0.3)
 
                     Text("Required Cloudflare API scopes for Flare")
                         .font(.system(size: 12))
@@ -28,21 +29,30 @@ struct PermissionsInspectorView: View {
                 Spacer()
 
                 Button(action: { dismiss() }) {
-                    Image(systemName: "xmark.circle.fill")
-                        .font(.system(size: 18))
+                    Image(systemName: "xmark")
+                        .font(.system(size: 12, weight: .semibold))
                         .foregroundStyle(FlareColors.textTertiary)
+                        .padding(6)
+                        .background(
+                            Circle()
+                                .fill(FlareColors.glassOverlay)
+                                .overlay(
+                                    Circle()
+                                        .strokeBorder(Color.white.opacity(0.1), lineWidth: 0.5)
+                                )
+                        )
                 }
                 .buttonStyle(.plain)
             }
             .padding(.horizontal, FlareSpacing.xl)
             .padding(.vertical, FlareSpacing.lg)
 
-            Divider().background(FlareColors.borderPrimary)
+            Divider().background(FlareColors.glassBorder)
 
-            // Summary banner
+            // Summary banner — glass
             summaryBanner
 
-            Divider().background(FlareColors.borderPrimary)
+            Divider().background(FlareColors.glassBorder)
 
             // Permission rows
             ScrollView {
@@ -51,7 +61,7 @@ struct PermissionsInspectorView: View {
                         permissionRow(perm)
                         if index < appState.permissionStatuses.count - 1 {
                             Divider()
-                                .background(FlareColors.borderPrimary)
+                                .background(FlareColors.glassBorder.opacity(0.5))
                                 .padding(.horizontal, FlareSpacing.xl)
                         }
                     }
@@ -59,9 +69,9 @@ struct PermissionsInspectorView: View {
                 .padding(.vertical, FlareSpacing.sm)
             }
 
-            Divider().background(FlareColors.borderPrimary)
+            Divider().background(FlareColors.glassBorder)
 
-            // Footer
+            // Footer — glass
             HStack(spacing: FlareSpacing.md) {
                 if appState.hasPermissionIssues {
                     Link(destination: URL(string: "https://dash.cloudflare.com/profile/api-tokens")!) {
@@ -97,12 +107,19 @@ struct PermissionsInspectorView: View {
                     .padding(.horizontal, FlareSpacing.md)
                     .padding(.vertical, FlareSpacing.sm)
                     .background(
-                        RoundedRectangle(cornerRadius: FlareRadius.md)
-                            .fill(FlareColors.bgTertiary)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: FlareRadius.md)
-                                    .strokeBorder(FlareColors.borderPrimary, lineWidth: 1)
-                            )
+                        ZStack {
+                            RoundedRectangle(cornerRadius: FlareRadius.lg, style: .continuous)
+                                .fill(FlareColors.glassOverlay)
+                            RoundedRectangle(cornerRadius: FlareRadius.lg, style: .continuous)
+                                .strokeBorder(
+                                    LinearGradient(
+                                        colors: [Color.white.opacity(0.12), Color.white.opacity(0.04)],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    ),
+                                    lineWidth: 0.5
+                                )
+                        }
                     )
                 }
                 .buttonStyle(.plain)
@@ -115,7 +132,7 @@ struct PermissionsInspectorView: View {
         .frame(minWidth: 480, minHeight: 420)
     }
 
-    // MARK: - Summary Banner
+    // MARK: - Summary Banner — Glass
 
     @ViewBuilder
     private var summaryBanner: some View {
@@ -134,6 +151,7 @@ struct PermissionsInspectorView: View {
                     Image(systemName: "exclamationmark.triangle.fill")
                         .font(.system(size: 11))
                         .foregroundStyle(FlareColors.statusWarning)
+                        .shadow(color: FlareColors.statusWarning.opacity(0.3), radius: 3)
                     Text("\(denied) permission\(denied == 1 ? "" : "s") missing")
                         .font(.system(size: 11, weight: .medium))
                         .foregroundStyle(FlareColors.statusWarning)
@@ -141,14 +159,15 @@ struct PermissionsInspectorView: View {
                 .padding(.horizontal, 10)
                 .padding(.vertical, 5)
                 .background(
-                    Capsule().fill(FlareColors.statusWarning.opacity(0.1))
-                        .overlay(Capsule().strokeBorder(FlareColors.statusWarning.opacity(0.3), lineWidth: 1))
+                    Capsule().fill(FlareColors.statusWarning.opacity(0.08))
+                        .overlay(Capsule().strokeBorder(FlareColors.statusWarning.opacity(0.2), lineWidth: 0.5))
                 )
             } else {
                 HStack(spacing: 6) {
                     Image(systemName: "checkmark.circle.fill")
                         .font(.system(size: 11))
                         .foregroundStyle(FlareColors.statusActive)
+                        .shadow(color: FlareColors.statusActive.opacity(0.3), radius: 3)
                     Text("All permissions granted")
                         .font(.system(size: 11, weight: .medium))
                         .foregroundStyle(FlareColors.statusActive)
@@ -157,7 +176,7 @@ struct PermissionsInspectorView: View {
         }
         .padding(.horizontal, FlareSpacing.xl)
         .padding(.vertical, FlareSpacing.md)
-        .background(FlareColors.bgSecondary)
+        .background(FlareColors.glassOverlay)
     }
 
     private func statusStat(label: String, value: String, color: Color) -> some View {
@@ -181,9 +200,11 @@ struct PermissionsInspectorView: View {
                 case .granted:
                     Image(systemName: "checkmark.circle.fill")
                         .foregroundStyle(FlareColors.statusActive)
+                        .shadow(color: FlareColors.statusActive.opacity(0.3), radius: 3)
                 case .denied:
                     Image(systemName: "xmark.circle.fill")
                         .foregroundStyle(FlareColors.statusError)
+                        .shadow(color: FlareColors.statusError.opacity(0.3), radius: 3)
                 case .unknown:
                     Image(systemName: "circle.dashed")
                         .foregroundStyle(FlareColors.textTertiary)
@@ -205,7 +226,12 @@ struct PermissionsInspectorView: View {
                         .padding(.horizontal, 6)
                         .padding(.vertical, 2)
                         .background(
-                            Capsule().fill(FlareColors.bgTertiary)
+                            Capsule()
+                                .fill(FlareColors.glassOverlay)
+                                .overlay(
+                                    Capsule()
+                                        .strokeBorder(Color.white.opacity(0.08), lineWidth: 0.5)
+                                )
                         )
                 }
                 Text(perm.description)
@@ -229,7 +255,15 @@ struct PermissionsInspectorView: View {
                     Capsule().fill(
                         (perm.status == .granted ? FlareColors.statusActive
                          : perm.status == .denied ? FlareColors.statusError
-                         : FlareColors.textTertiary).opacity(0.12)
+                         : FlareColors.textTertiary).opacity(0.10)
+                    )
+                    .overlay(
+                        Capsule().strokeBorder(
+                            (perm.status == .granted ? FlareColors.statusActive
+                             : perm.status == .denied ? FlareColors.statusError
+                             : FlareColors.textTertiary).opacity(0.15),
+                            lineWidth: 0.5
+                        )
                     )
                 )
         }

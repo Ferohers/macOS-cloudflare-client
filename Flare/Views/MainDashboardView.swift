@@ -2,7 +2,7 @@
 //  MainDashboardView.swift
 //  Flare
 //
-//  Three-column NavigationSplitView dashboard layout
+//  Three-column NavigationSplitView dashboard — Liquid Glass
 //
 
 import SwiftUI
@@ -79,10 +79,12 @@ struct MainDashboardView: View {
                 Image(systemName: "key.fill")
                     .font(.system(size: 32))
                     .foregroundStyle(FlareColors.cloudflareOrange)
+                    .shadow(color: FlareColors.cloudflareOrange.opacity(0.4), radius: 8)
                 
                 Text("API Requirements")
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundStyle(FlareColors.textPrimary)
+                    .tracking(0.3)
                 
                 Text("Ensure your Cloudflare API Token has the following permissions for Flare to work correctly.")
                     .font(.system(size: 12))
@@ -93,19 +95,12 @@ struct MainDashboardView: View {
 
             VStack(alignment: .leading, spacing: 0) {
                 permissionRow(resource: "Zone", category: "Zone", access: "Read")
-                Divider().background(FlareColors.borderPrimary).padding(.horizontal, FlareSpacing.md)
+                Divider().background(FlareColors.glassBorder.opacity(0.5)).padding(.horizontal, FlareSpacing.md)
                 permissionRow(resource: "Zone", category: "DNS", access: "Read")
-                Divider().background(FlareColors.borderPrimary).padding(.horizontal, FlareSpacing.md)
+                Divider().background(FlareColors.glassBorder.opacity(0.5)).padding(.horizontal, FlareSpacing.md)
                 permissionRow(resource: "Account", category: "Workers Scripts", access: "Read")
             }
-            .background(
-                RoundedRectangle(cornerRadius: FlareRadius.lg)
-                    .fill(FlareColors.bgSecondary)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: FlareRadius.lg)
-                            .strokeBorder(FlareColors.borderPrimary, lineWidth: 1)
-                    )
-            )
+            .nestedGlass(cornerRadius: FlareRadius.lg)
             .padding(.horizontal, FlareSpacing.xl)
             
             if !appState.missingPermissions.isEmpty {
@@ -114,6 +109,7 @@ struct MainDashboardView: View {
                         Image(systemName: "exclamationmark.triangle.fill")
                             .font(.system(size: 12))
                             .foregroundStyle(FlareColors.statusWarning)
+                            .shadow(color: FlareColors.statusWarning.opacity(0.3), radius: 3)
                         Text("Missing Permissions Detected")
                             .font(.system(size: 12, weight: .semibold))
                             .foregroundStyle(FlareColors.statusWarning)
@@ -124,6 +120,7 @@ struct MainDashboardView: View {
                             Circle()
                                 .fill(FlareColors.statusError)
                                 .frame(width: 5, height: 5)
+                                .shadow(color: FlareColors.statusError.opacity(0.4), radius: 2)
                             Text(perm)
                                 .font(.system(size: 11))
                                 .foregroundStyle(FlareColors.textSecondary)
@@ -132,11 +129,11 @@ struct MainDashboardView: View {
                 }
                 .padding(FlareSpacing.md)
                 .background(
-                    RoundedRectangle(cornerRadius: FlareRadius.md)
-                        .fill(FlareColors.statusWarning.opacity(0.06))
+                    RoundedRectangle(cornerRadius: FlareRadius.lg, style: .continuous)
+                        .fill(FlareColors.statusWarning.opacity(0.05))
                         .overlay(
-                            RoundedRectangle(cornerRadius: FlareRadius.md)
-                                .strokeBorder(FlareColors.statusWarning.opacity(0.2), lineWidth: 1)
+                            RoundedRectangle(cornerRadius: FlareRadius.lg, style: .continuous)
+                                .strokeBorder(FlareColors.statusWarning.opacity(0.15), lineWidth: 0.5)
                         )
                 )
                 .padding(.horizontal, FlareSpacing.xl)
@@ -154,6 +151,7 @@ struct MainDashboardView: View {
             Image(systemName: "checkmark.circle.fill")
                 .font(.system(size: 14))
                 .foregroundStyle(FlareColors.statusActive)
+                .shadow(color: FlareColors.statusActive.opacity(0.3), radius: 3)
             
             VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: 4) {
@@ -181,7 +179,8 @@ struct MainDashboardView: View {
         VStack(spacing: FlareSpacing.lg) {
             Image(systemName: icon)
                 .font(.system(size: 48, weight: .ultraLight))
-                .foregroundStyle(FlareColors.textTertiary.opacity(0.5))
+                .foregroundStyle(FlareColors.textTertiary.opacity(0.4))
+                .shadow(color: FlareColors.textTertiary.opacity(0.1), radius: 8)
 
             Text(title)
                 .font(.system(size: 16, weight: .medium))

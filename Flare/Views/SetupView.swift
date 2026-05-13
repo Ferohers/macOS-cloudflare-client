@@ -2,7 +2,7 @@
 //  SetupView.swift
 //  Flare
 //
-//  Premium onboarding screen for API token entry
+//  Premium onboarding screen — Liquid Glass token entry
 //
 
 import SwiftUI
@@ -16,30 +16,9 @@ struct SetupView: View {
 
     var body: some View {
         ZStack {
-            // Background gradient
-            LinearGradient(
-                colors: [
-                    FlareColors.bgPrimary,
-                    Color(hex: "0A0F14"),
-                    FlareColors.bgPrimary
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .ignoresSafeArea()
-
-            // Subtle radial glow behind logo
-            RadialGradient(
-                colors: [
-                    FlareColors.cloudflareOrange.opacity(0.06),
-                    Color.clear
-                ],
-                center: .center,
-                startRadius: 20,
-                endRadius: 200
-            )
-            .offset(y: -40)
-            .ignoresSafeArea()
+            // Clear background to let the window modifier handle the material
+            Color.clear
+                .ignoresSafeArea()
 
             VStack(spacing: FlareSpacing.xl) {
                 // Logo & Title
@@ -54,7 +33,7 @@ struct SetupView: View {
                                 endPoint: .top
                             )
                         )
-                        .glowEffect(radius: 25)
+                        .shadow(color: FlareColors.cloudflareOrange.opacity(0.4), radius: 16, x: 0, y: 0)
                         .scaleEffect(logoScale)
                         .opacity(logoOpacity)
 
@@ -62,6 +41,7 @@ struct SetupView: View {
                         Text("Welcome to Flare")
                             .font(.system(size: 22, weight: .bold))
                             .foregroundStyle(FlareColors.textPrimary)
+                            .tracking(0.5)
 
                         Text("Connect your Cloudflare account to get started")
                             .font(.system(size: 12))
@@ -70,16 +50,18 @@ struct SetupView: View {
                     .opacity(logoOpacity)
                 }
 
-                // Token Input Card
+                // Token Input Card — Glass panel
                 VStack(spacing: FlareSpacing.md) {
                     VStack(alignment: .leading, spacing: FlareSpacing.sm) {
                         HStack(spacing: FlareSpacing.xs) {
                             Image(systemName: "key.fill")
                                 .font(.system(size: 10, weight: .semibold))
                                 .foregroundStyle(FlareColors.cloudflareOrange)
+                                .shadow(color: FlareColors.cloudflareOrange.opacity(0.3), radius: 2)
                             Text("API Token")
                                 .font(.system(size: 11, weight: .semibold))
                                 .foregroundStyle(FlareColors.textSecondary)
+                                .tracking(0.5)
                         }
 
                         HStack(spacing: FlareSpacing.sm) {
@@ -91,19 +73,21 @@ struct SetupView: View {
                                 .textFieldStyle(.plain)
                                 .font(.system(size: 13, design: .monospaced))
                                 .foregroundStyle(FlareColors.textPrimary)
+                                .lineLimit(1)
+                                .truncationMode(.tail)
                         }
-                        .padding(FlareSpacing.sm)
-                        .padding(.horizontal, FlareSpacing.xs)
+                        .frame(height: 36)
+                        .padding(.horizontal, FlareSpacing.sm + FlareSpacing.xs)
                         .background(
-                            RoundedRectangle(cornerRadius: FlareRadius.md)
-                                .fill(FlareColors.bgPrimary)
+                            RoundedRectangle(cornerRadius: FlareRadius.md, style: .continuous)
+                                .fill(FlareColors.bgPrimary.opacity(0.8))
                                 .overlay(
-                                    RoundedRectangle(cornerRadius: FlareRadius.md)
+                                    RoundedRectangle(cornerRadius: FlareRadius.md, style: .continuous)
                                         .strokeBorder(
                                             tokenInput.isEmpty
-                                                ? FlareColors.borderPrimary
-                                                : FlareColors.cloudflareOrange.opacity(0.5),
-                                            lineWidth: 1
+                                                ? FlareColors.glassBorder
+                                                : FlareColors.cloudflareOrange.opacity(0.4),
+                                            lineWidth: 0.5
                                         )
                                 )
                         )
@@ -124,11 +108,11 @@ struct SetupView: View {
                         .padding(FlareSpacing.sm)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .background(
-                            RoundedRectangle(cornerRadius: FlareRadius.sm)
+                            RoundedRectangle(cornerRadius: FlareRadius.sm, style: .continuous)
                                 .fill(FlareColors.statusError.opacity(0.08))
                                 .overlay(
-                                    RoundedRectangle(cornerRadius: FlareRadius.sm)
-                                        .strokeBorder(FlareColors.statusError.opacity(0.2), lineWidth: 1)
+                                    RoundedRectangle(cornerRadius: FlareRadius.sm, style: .continuous)
+                                        .strokeBorder(FlareColors.statusError.opacity(0.15), lineWidth: 0.5)
                                 )
                         )
                         .transition(.opacity.combined(with: .move(edge: .top)))
@@ -155,16 +139,7 @@ struct SetupView: View {
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, FlareSpacing.sm + 2)
                         .foregroundStyle(.white)
-                        .background(
-                            RoundedRectangle(cornerRadius: FlareRadius.md)
-                                .fill(
-                                    tokenInput.isEmpty
-                                        ? FlareColors.bgElevated
-                                        : (isHoveringConnect
-                                            ? FlareColors.cloudflareOrangeDark
-                                            : FlareColors.cloudflareOrange)
-                                )
-                        )
+                        .liquidGlassButton(isPrimary: !tokenInput.isEmpty)
                     }
                     .buttonStyle(.plain)
                     .disabled(tokenInput.isEmpty || appState.isAuthenticating)
@@ -186,24 +161,16 @@ struct SetupView: View {
                     .foregroundStyle(FlareColors.textTertiary)
                 }
                 .padding(FlareSpacing.lg)
-                .background(
-                    RoundedRectangle(cornerRadius: FlareRadius.xl)
-                        .fill(FlareColors.bgSecondary)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: FlareRadius.xl)
-                                .strokeBorder(FlareColors.borderPrimary, lineWidth: 1)
-                        )
-                )
-                .shadow(color: .black.opacity(0.25), radius: 30, y: 15)
+                .nestedGlass(cornerRadius: FlareRadius.window)
 
                 // Version footer
                 Text("Flare v1.0")
-                    .font(.system(size: 9))
+                    .font(.system(size: 10, weight: .medium))
                     .foregroundStyle(FlareColors.textTertiary)
+                    .padding(.top, FlareSpacing.xl)
             }
-            .padding(FlareSpacing.xxl)
-            .frame(width: 420)
         }
+        .liquidGlass(cornerRadius: FlareRadius.window).frame(width: 420)
         .frame(idealWidth: 520, idealHeight: 460)
         .onAppear {
             withAnimation(.spring(response: 0.8, dampingFraction: 0.7).delay(0.1)) {

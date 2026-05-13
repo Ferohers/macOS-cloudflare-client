@@ -108,6 +108,15 @@ final class AppState {
         selectedItem = nil
         errorMessage = nil
         permissionStatuses = PermissionCheck.allRequired
+
+        #if os(macOS)
+        DispatchQueue.main.async {
+            if let window = NSApplication.shared.windows.first(where: { $0.isKeyWindow }) ?? NSApplication.shared.windows.first {
+                let rect = NSRect(x: window.frame.origin.x, y: window.frame.origin.y, width: 520, height: 460)
+                window.setFrame(rect, display: true, animate: true)
+            }
+        }
+        #endif
     }
 
     // MARK: - Data Loading

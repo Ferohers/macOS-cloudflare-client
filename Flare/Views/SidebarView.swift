@@ -2,7 +2,7 @@
 //  SidebarView.swift
 //  Flare
 //
-//  Navigation sidebar with branding, sections, and user info
+//  Frosted glass navigation sidebar — macOS Tahoe Liquid Glass
 //
 
 import SwiftUI
@@ -13,9 +13,6 @@ struct SidebarView: View {
         VStack(spacing: 0) {
             // Branding header
             brandingHeader
-
-            Divider()
-                .background(FlareColors.borderPrimary)
 
             List(selection: Binding(
                 get: { appState.selectedItem },
@@ -31,48 +28,75 @@ struct SidebarView: View {
                     }
                 }
             )) {
-                Section("Zones") {
+                Section {
                     let visibleZones = appState.zones.filter { !appState.hiddenZoneIds.contains($0.id) }
                     if appState.isLoadingZones && visibleZones.isEmpty {
-                        Text("Loading...").foregroundStyle(FlareColors.textTertiary)
+                        Text("Loading...")
+                            .foregroundStyle(FlareColors.textTertiary)
+                            .font(.system(size: 12))
                     } else if visibleZones.isEmpty {
-                        Text("No zones").foregroundStyle(FlareColors.textTertiary)
+                        Text("No zones")
+                            .foregroundStyle(FlareColors.textTertiary)
+                            .font(.system(size: 12))
                     } else {
                         ForEach(visibleZones) { zone in
                             NavigationLink(value: SidebarItem.zone(zone.id)) {
                                 Label(zone.name, systemImage: "globe")
+                                    .font(.system(size: 12, weight: .regular))
                             }
                         }
                     }
+                } header: {
+                    Text("Zones")
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundStyle(FlareColors.textPrimary)
+                        .tracking(0.8)
                 }
                 
-                Section("Workers") {
+                Section {
                     if appState.isLoadingWorkers && appState.workers.isEmpty {
-                        Text("Loading...").foregroundStyle(FlareColors.textTertiary)
+                        Text("Loading...")
+                            .foregroundStyle(FlareColors.textTertiary)
+                            .font(.system(size: 12))
                     } else if appState.workers.isEmpty {
-                        Text("No workers").foregroundStyle(FlareColors.textTertiary)
+                        Text("No workers")
+                            .foregroundStyle(FlareColors.textTertiary)
+                            .font(.system(size: 12))
                     } else {
                         ForEach(appState.workers) { worker in
                             NavigationLink(value: SidebarItem.worker(worker.id)) {
                                 Label(worker.displayName, systemImage: "chevron.left.forwardslash.chevron.right")
+                                    .font(.system(size: 12, weight: .regular))
                             }
                         }
                     }
+                } header: {
+                    Text("Workers")
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundStyle(FlareColors.textPrimary)
+                        .tracking(0.8)
                 }
                 
-                Section("Preferences") {
+                Section {
                     NavigationLink(value: SidebarItem.settings) {
                         Label("Settings", systemImage: "gearshape")
+                            .font(.system(size: 12, weight: .regular))
                     }
+                } header: {
+                    Text("Preferences")
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundStyle(FlareColors.textPrimary)
+                        .tracking(0.8)
                 }
             }
             .listStyle(.sidebar)
+            .accentColor(FlareColors.cloudflareOrange)
             .tint(FlareColors.cloudflareOrange)
             .listItemTint(FlareColors.cloudflareOrange)
             .scrollContentBackground(.hidden)
             .background(Color.clear)
 
-            // User info footer
+            // User info footer — glass element
             userFooter
         }
         .frame(minWidth: 200)
@@ -97,10 +121,12 @@ struct SidebarView: View {
                         endPoint: .top
                     )
                 )
+                .shadow(color: FlareColors.cloudflareOrange.opacity(0.4), radius: 6, x: 0, y: 0)
 
             Text("Flare")
                 .font(.system(size: 16, weight: .bold))
                 .foregroundStyle(FlareColors.textPrimary)
+                .tracking(0.5)
 
             Spacer()
         }
@@ -108,14 +134,10 @@ struct SidebarView: View {
         .padding(.vertical, FlareSpacing.lg)
     }
 
-    // MARK: - User Footer
+    // MARK: - User Footer — Glass element
 
     private var userFooter: some View {
         VStack(spacing: 0) {
-            Divider()
-                .background(FlareColors.borderPrimary)
-                .padding(.horizontal, FlareSpacing.lg)
-
             HStack(spacing: FlareSpacing.sm) {
                 // Connected Icon
                 Circle()
@@ -126,12 +148,13 @@ struct SidebarView: View {
                             endPoint: .bottomTrailing
                         )
                     )
-                    .frame(width: 28, height: 28)
+                    .frame(width: 26, height: 26)
                     .overlay(
                         Image(systemName: "checkmark")
-                            .font(.system(size: 12, weight: .bold))
+                            .font(.system(size: 11, weight: .bold))
                             .foregroundStyle(.white)
                     )
+                    .shadow(color: FlareColors.statusActive.opacity(0.3), radius: 4, x: 0, y: 0)
 
                 VStack(alignment: .leading, spacing: 1) {
                     Text("Connected")
@@ -141,14 +164,17 @@ struct SidebarView: View {
                         .truncationMode(.middle)
 
                     Text("Cloudflare API")
-                        .font(.system(size: 9))
-                        .foregroundStyle(FlareColors.textTertiary)
+                        .font(.system(size: 9, weight: .medium))
+                        .foregroundStyle(FlareColors.textPrimary)
                 }
 
                 Spacer()
             }
-            .padding(.horizontal, FlareSpacing.lg)
-            .padding(.vertical, FlareSpacing.md)
+            .padding(.horizontal, FlareSpacing.md)
+            .padding(.vertical, FlareSpacing.sm)
+            .glassFooter(cornerRadius: FlareRadius.lg)
         }
+        .padding(.horizontal, FlareSpacing.sm)
+        .padding(.vertical, FlareSpacing.sm)
     }
 }

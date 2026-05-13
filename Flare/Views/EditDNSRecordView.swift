@@ -2,6 +2,8 @@
 //  EditDNSRecordView.swift
 //  Flare
 //
+//  DNS record editor modal — Liquid Glass
+//
 
 import SwiftUI
 
@@ -28,24 +30,43 @@ struct EditDNSRecordView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Header
+            // Header — glass
             HStack {
                 Text(record != nil ? "Edit \(record!.type) Record" : "Add DNS Record")
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundStyle(FlareColors.textPrimary)
+                    .tracking(0.3)
                 Spacer()
                 Button(action: { dismiss() }) {
                     Image(systemName: "xmark")
-                        .font(.system(size: 14))
+                        .font(.system(size: 12, weight: .semibold))
                         .foregroundStyle(FlareColors.textTertiary)
+                        .padding(6)
+                        .background(
+                            Circle()
+                                .fill(FlareColors.glassOverlay)
+                                .overlay(
+                                    Circle()
+                                        .strokeBorder(Color.white.opacity(0.1), lineWidth: 0.5)
+                                )
+                        )
                 }
                 .buttonStyle(.plain)
             }
             .padding(FlareSpacing.lg)
-            .background(FlareColors.bgSecondary)
+            .background(
+                ZStack {
+                    Rectangle().fill(FlareColors.glassOverlay)
+                    LinearGradient(
+                        colors: [Color.white.opacity(0.04), Color.clear],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                }
+            )
 
             Divider()
-                .background(FlareColors.borderPrimary)
+                .background(FlareColors.glassBorder)
 
             // Form
             VStack(spacing: FlareSpacing.lg) {
@@ -76,11 +97,21 @@ struct EditDNSRecordView: View {
                         .textFieldStyle(.plain)
                         .padding(FlareSpacing.sm)
                         .background(
-                            RoundedRectangle(cornerRadius: FlareRadius.sm)
-                                .fill(FlareColors.bgPrimary)
+                            RoundedRectangle(cornerRadius: FlareRadius.md, style: .continuous)
+                                .fill(FlareColors.bgPrimary.opacity(0.8))
                                 .overlay(
-                                    RoundedRectangle(cornerRadius: FlareRadius.sm)
-                                        .strokeBorder(FlareColors.borderPrimary, lineWidth: 1)
+                                    RoundedRectangle(cornerRadius: FlareRadius.md, style: .continuous)
+                                        .strokeBorder(
+                                            LinearGradient(
+                                                colors: [
+                                                    Color.white.opacity(0.12),
+                                                    Color.white.opacity(0.05)
+                                                ],
+                                                startPoint: .topLeading,
+                                                endPoint: .bottomTrailing
+                                            ),
+                                            lineWidth: 0.5
+                                        )
                                 )
                         )
                 }
@@ -94,11 +125,21 @@ struct EditDNSRecordView: View {
                         .textFieldStyle(.plain)
                         .padding(FlareSpacing.sm)
                         .background(
-                            RoundedRectangle(cornerRadius: FlareRadius.sm)
-                                .fill(FlareColors.bgPrimary)
+                            RoundedRectangle(cornerRadius: FlareRadius.md, style: .continuous)
+                                .fill(FlareColors.bgPrimary.opacity(0.8))
                                 .overlay(
-                                    RoundedRectangle(cornerRadius: FlareRadius.sm)
-                                        .strokeBorder(FlareColors.borderPrimary, lineWidth: 1)
+                                    RoundedRectangle(cornerRadius: FlareRadius.md, style: .continuous)
+                                        .strokeBorder(
+                                            LinearGradient(
+                                                colors: [
+                                                    Color.white.opacity(0.12),
+                                                    Color.white.opacity(0.05)
+                                                ],
+                                                startPoint: .topLeading,
+                                                endPoint: .bottomTrailing
+                                            ),
+                                            lineWidth: 0.5
+                                        )
                                 )
                         )
                 }
@@ -115,9 +156,9 @@ struct EditDNSRecordView: View {
             Spacer()
 
             Divider()
-                .background(FlareColors.borderPrimary)
+                .background(FlareColors.glassBorder)
 
-            // Footer
+            // Footer — glass
             HStack {
                 if record != nil {
                     Button(action: {
@@ -128,13 +169,14 @@ struct EditDNSRecordView: View {
                                 .controlSize(.small)
                         } else {
                             Text("Delete")
-                                .font(.system(size: 12, weight: .medium))
+                                .font(.system(size: 12, weight: .semibold))
                                 .foregroundStyle(.white)
                                 .padding(.horizontal, FlareSpacing.md)
                                 .padding(.vertical, FlareSpacing.sm)
                                 .background(
-                                    RoundedRectangle(cornerRadius: FlareRadius.md)
-                                        .fill(FlareColors.statusError)
+                                    RoundedRectangle(cornerRadius: FlareRadius.lg, style: .continuous)
+                                        .fill(FlareColors.statusError.opacity(0.85))
+                                        .shadow(color: FlareColors.statusError.opacity(0.2), radius: 4, x: 0, y: 2)
                                 )
                         }
                     }
@@ -150,10 +192,7 @@ struct EditDNSRecordView: View {
                         .foregroundStyle(FlareColors.textPrimary)
                         .padding(.horizontal, FlareSpacing.md)
                         .padding(.vertical, FlareSpacing.sm)
-                        .background(
-                            RoundedRectangle(cornerRadius: FlareRadius.md)
-                                .fill(FlareColors.bgTertiary)
-                        )
+                        .liquidGlassButton(isPrimary: false)
                 }
                 .buttonStyle(.plain)
                 .disabled(isSaving)
@@ -166,24 +205,31 @@ struct EditDNSRecordView: View {
                             .controlSize(.small)
                     } else {
                         Text("Save")
-                            .font(.system(size: 12, weight: .medium))
+                            .font(.system(size: 12, weight: .semibold))
                             .foregroundStyle(.white)
                             .padding(.horizontal, FlareSpacing.md)
                             .padding(.vertical, FlareSpacing.sm)
-                            .background(
-                                RoundedRectangle(cornerRadius: FlareRadius.md)
-                                    .fill(FlareColors.cloudflareOrange)
-                            )
+                            .liquidGlassButton(isPrimary: true)
                     }
                 }
                 .buttonStyle(.plain)
                 .disabled(isSaving)
             }
             .padding(FlareSpacing.lg)
-            .background(FlareColors.bgSecondary)
+            .background(
+                ZStack {
+                    Rectangle().fill(FlareColors.glassOverlay)
+                    LinearGradient(
+                        colors: [Color.white.opacity(0.03), Color.clear],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                }
+            )
         }
         .frame(width: 400, height: 380)
         .background(FlareColors.bgPrimary)
+        .clipShape(RoundedRectangle(cornerRadius: FlareRadius.window, style: .continuous))
     }
 
     private func saveRecord() {

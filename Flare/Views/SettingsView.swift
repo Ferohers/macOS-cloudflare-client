@@ -2,7 +2,7 @@
 //  SettingsView.swift
 //  Flare
 //
-//  Account info, token management, and app preferences
+//  Account info, token management, and app preferences — Liquid Glass panels
 //
 
 import SwiftUI
@@ -11,6 +11,8 @@ struct SettingsView: View {
     @Environment(AppState.self) private var appState
     @State private var showSignOutAlert = false
     @State private var isHoveringSignOut = false
+    @State private var isHoveringExport = false
+    @State private var isHoveringGitHub = false
     @State private var showPermissionsSheet = false
 
     var body: some View {
@@ -21,7 +23,7 @@ struct SettingsView: View {
                     .padding(.horizontal, FlareSpacing.xl)
                     .padding(.top, FlareSpacing.lg)
 
-                // Account section
+                // Account section — nested glass
                 settingsSection("Account") {
                     settingsRow(
                         icon: "globe",
@@ -30,7 +32,7 @@ struct SettingsView: View {
                         value: "\(appState.zones.count)"
                     )
 
-                    Divider().background(FlareColors.borderPrimary).padding(.horizontal, FlareSpacing.md)
+                    Divider().background(FlareColors.glassBorder.opacity(0.5)).padding(.horizontal, FlareSpacing.md)
 
                     settingsRow(
                         icon: "chevron.left.forwardslash.chevron.right",
@@ -40,7 +42,7 @@ struct SettingsView: View {
                     )
                 }
 
-                // Domain Filter section
+                // Domain Filter section — nested glass
                 settingsSection("Visible Domains") {
                     if appState.zones.isEmpty {
                         HStack(spacing: FlareSpacing.sm) {
@@ -59,19 +61,20 @@ struct SettingsView: View {
                             DomainToggleRow(zone: zone, appState: appState)
 
                             if index < appState.zones.count - 1 {
-                                Divider().background(FlareColors.borderPrimary).padding(.horizontal, FlareSpacing.md)
+                                Divider().background(FlareColors.glassBorder.opacity(0.5)).padding(.horizontal, FlareSpacing.md)
                             }
                         }
                     }
                 }
 
-                // API Token section
+                // API Token section — nested glass
                 settingsSection("API Token") {
                     Button(action: { showPermissionsSheet = true }) {
                         HStack(spacing: FlareSpacing.md) {
                             Image(systemName: "key.fill")
                                 .font(.system(size: 13))
                                 .foregroundStyle(FlareColors.statusActive)
+                                .shadow(color: FlareColors.statusActive.opacity(0.3), radius: 3, x: 0, y: 0)
                                 .frame(width: 24)
 
                             VStack(alignment: .leading, spacing: 2) {
@@ -99,6 +102,7 @@ struct SettingsView: View {
                                     Circle()
                                         .fill(FlareColors.statusWarning)
                                         .frame(width: 8, height: 8)
+                                        .shadow(color: FlareColors.statusWarning.opacity(0.4), radius: 3)
                                     Text("Issues")
                                         .font(.system(size: 11, weight: .semibold))
                                         .foregroundStyle(FlareColors.statusWarning)
@@ -107,21 +111,22 @@ struct SettingsView: View {
                                 .padding(.vertical, 5)
                                 .background(
                                     Capsule()
-                                        .fill(FlareColors.statusWarning.opacity(0.12))
-                                        .overlay(Capsule().strokeBorder(FlareColors.statusWarning.opacity(0.4), lineWidth: 1))
+                                        .fill(FlareColors.statusWarning.opacity(0.10))
+                                        .overlay(Capsule().strokeBorder(FlareColors.statusWarning.opacity(0.25), lineWidth: 0.5))
                                 )
                             } else {
                                 HStack(spacing: 5) {
                                     Circle()
                                         .fill(FlareColors.statusActive)
                                         .frame(width: 8, height: 8)
+                                        .shadow(color: FlareColors.statusActive.opacity(0.4), radius: 3)
                                     Text("Connected")
                                         .font(.system(size: 11, weight: .semibold))
                                         .foregroundStyle(FlareColors.statusActive)
                                 }
                             }
 
-                            // Chevron to hint clickability
+                            // Chevron
                             Image(systemName: "chevron.right")
                                 .font(.system(size: 10, weight: .semibold))
                                 .foregroundStyle(FlareColors.textTertiary)
@@ -139,6 +144,7 @@ struct SettingsView: View {
                                 Image(systemName: "exclamationmark.shield.fill")
                                     .font(.system(size: 14))
                                     .foregroundStyle(FlareColors.statusWarning)
+                                    .shadow(color: FlareColors.statusWarning.opacity(0.3), radius: 3)
 
                                 Text("Your API token may be missing these permissions:")
                                     .font(.system(size: 12))
@@ -176,12 +182,13 @@ struct SettingsView: View {
                     }
                 }
 
-                // Danger zone
+                // Danger zone — nested glass
                 settingsSection("Danger Zone") {
                     HStack(spacing: FlareSpacing.md) {
                         Image(systemName: "rectangle.portrait.and.arrow.right")
                             .font(.system(size: 13))
                             .foregroundStyle(FlareColors.statusError)
+                            .shadow(color: FlareColors.statusError.opacity(0.3), radius: 3)
                             .frame(width: 24)
 
                         VStack(alignment: .leading, spacing: 2) {
@@ -202,29 +209,25 @@ struct SettingsView: View {
                                 .foregroundStyle(.white)
                                 .padding(.horizontal, FlareSpacing.md)
                                 .padding(.vertical, FlareSpacing.sm)
-                                .background(
-                                    RoundedRectangle(cornerRadius: FlareRadius.md)
-                                        .fill(
-                                            isHoveringSignOut
-                                                ? FlareColors.statusError
-                                                : FlareColors.statusError.opacity(0.8)
-                                        )
-                                )
+                                .liquidGlassButton(color: FlareColors.statusError.opacity(0.9), isPrimary: true)
                         }
                         .buttonStyle(.plain)
                         .onHover { hovering in
-                            isHoveringSignOut = hovering
+                            withAnimation(.easeInOut(duration: 0.15)) {
+                                isHoveringSignOut = hovering
+                            }
                         }
                     }
                     .padding(FlareSpacing.md)
                 }
 
-                // Export section
+                // Export section — nested glass
                 settingsSection("Data Export") {
                     HStack(spacing: FlareSpacing.md) {
                         Image(systemName: "tablecells.fill")
                             .font(.system(size: 13))
                             .foregroundStyle(FlareColors.textLink)
+                            .shadow(color: FlareColors.textLink.opacity(0.3), radius: 3)
                             .frame(width: 24)
 
                         VStack(alignment: .leading, spacing: 2) {
@@ -254,19 +257,21 @@ struct SettingsView: View {
                                     .foregroundStyle(.white)
                                     .padding(.horizontal, FlareSpacing.md)
                                     .padding(.vertical, FlareSpacing.sm)
-                                    .background(
-                                        RoundedRectangle(cornerRadius: FlareRadius.md)
-                                            .fill(FlareColors.textLink)
-                                    )
+                                    .liquidGlassButton(color: FlareColors.textLink.opacity(0.9), isPrimary: true)
                             }
                         }
                         .buttonStyle(.plain)
                         .disabled(appState.isExporting)
+                        .onHover { hovering in
+                            withAnimation(.easeInOut(duration: 0.15)) {
+                                isHoveringExport = hovering
+                            }
+                        }
                     }
                     .padding(FlareSpacing.md)
                 }
 
-                // About section
+                // About section — distinct glass element
                 settingsSection("About") {
                     VStack(spacing: 0) {
                         // App identity
@@ -275,13 +280,14 @@ struct SettingsView: View {
                                 .resizable()
                                 .scaledToFit()
                                 .frame(width: 52, height: 52)
-                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                                 .shadow(color: .black.opacity(0.4), radius: 6, x: 0, y: 3)
 
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("Flare")
                                     .font(.system(size: 15, weight: .bold))
                                     .foregroundStyle(FlareColors.textPrimary)
+                                    .tracking(0.3)
                                 Text("Native macOS Cloudflare Dashboard")
                                     .font(.system(size: 11))
                                     .foregroundStyle(FlareColors.textSecondary)
@@ -294,13 +300,14 @@ struct SettingsView: View {
                         }
                         .padding(FlareSpacing.md)
 
-                        Divider().background(FlareColors.borderPrimary).padding(.horizontal, FlareSpacing.md)
+                        Divider().background(FlareColors.glassBorder.opacity(0.5)).padding(.horizontal, FlareSpacing.md)
 
-                        // GitHub link
+                        // GitHub link — with subtle glow arrow
                         HStack(spacing: FlareSpacing.md) {
                             Image(systemName: "chevron.left.forwardslash.chevron.right")
                                 .font(.system(size: 13))
                                 .foregroundStyle(FlareColors.textLink)
+                                .shadow(color: FlareColors.textLink.opacity(0.3), radius: 3)
                                 .frame(width: 24)
 
                             Text("Open Source")
@@ -309,19 +316,32 @@ struct SettingsView: View {
 
                             Spacer()
 
-                            Link("GitHub →", destination: URL(string: "https://github.com/Ferohers/macOS-cloudflare-client")!)
-                                .font(.system(size: 12, weight: .medium))
+                            Link(destination: URL(string: "https://github.com/Ferohers/macOS-cloudflare-client")!) {
+                                HStack(spacing: 4) {
+                                    Text("GitHub")
+                                        .font(.system(size: 12, weight: .medium))
+                                    Image(systemName: "arrow.up.right")
+                                        .font(.system(size: 10, weight: .semibold))
+                                        .shadow(color: FlareColors.textLink.opacity(isHoveringGitHub ? 0.6 : 0.3), radius: isHoveringGitHub ? 6 : 3)
+                                }
                                 .foregroundStyle(FlareColors.textLink)
+                            }
+                            .onHover { hovering in
+                                withAnimation(.easeInOut(duration: 0.2)) {
+                                    isHoveringGitHub = hovering
+                                }
+                            }
                         }
                         .padding(FlareSpacing.md)
 
-                        Divider().background(FlareColors.borderPrimary).padding(.horizontal, FlareSpacing.md)
+                        Divider().background(FlareColors.glassBorder.opacity(0.5)).padding(.horizontal, FlareSpacing.md)
 
-                        // Privacy statement
+                        // Privacy statement — verbatim text
                         HStack(alignment: .top, spacing: FlareSpacing.md) {
                             Image(systemName: "hand.raised.fill")
                                 .font(.system(size: 13))
                                 .foregroundStyle(FlareColors.statusActive)
+                                .shadow(color: FlareColors.statusActive.opacity(0.3), radius: 3)
                                 .frame(width: 24)
 
                             VStack(alignment: .leading, spacing: 3) {
@@ -358,7 +378,7 @@ struct SettingsView: View {
         }
     }
 
-    // MARK: - Section Builder
+    // MARK: - Section Builder — Nested Glass Panels
 
     private func settingsSection(_ title: String, @ViewBuilder content: () -> some View) -> some View {
         VStack(alignment: .leading, spacing: FlareSpacing.sm) {
@@ -366,19 +386,13 @@ struct SettingsView: View {
                 .font(.system(size: 11, weight: .semibold))
                 .foregroundStyle(FlareColors.textTertiary)
                 .textCase(.uppercase)
+                .tracking(0.8)
                 .padding(.horizontal, FlareSpacing.xl)
 
             VStack(spacing: 0) {
                 content()
             }
-            .background(
-                RoundedRectangle(cornerRadius: FlareRadius.lg)
-                    .fill(FlareColors.bgSecondary)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: FlareRadius.lg)
-                            .strokeBorder(FlareColors.borderPrimary, lineWidth: 1)
-                    )
-            )
+            .nestedGlass(cornerRadius: FlareRadius.lg)
             .padding(.horizontal, FlareSpacing.xl)
         }
     }
@@ -388,6 +402,7 @@ struct SettingsView: View {
             Image(systemName: icon)
                 .font(.system(size: 13))
                 .foregroundStyle(iconColor)
+                .shadow(color: iconColor.opacity(0.3), radius: 3, x: 0, y: 0)
                 .frame(width: 24)
 
             Text(title)
@@ -417,6 +432,7 @@ struct DomainToggleRow: View {
             Image(systemName: "globe")
                 .font(.system(size: 13))
                 .foregroundStyle(isVisible ? FlareColors.statusActive : FlareColors.textTertiary)
+                .shadow(color: isVisible ? FlareColors.statusActive.opacity(0.3) : Color.clear, radius: 3)
                 .frame(width: 24)
 
             VStack(alignment: .leading, spacing: 1) {
@@ -433,7 +449,12 @@ struct DomainToggleRow: View {
                         .padding(.horizontal, 6)
                         .padding(.vertical, 2)
                         .background(
-                            Capsule().fill(FlareColors.statusError.opacity(0.12))
+                            Capsule()
+                                .fill(FlareColors.statusError.opacity(0.10))
+                                .overlay(
+                                    Capsule()
+                                        .strokeBorder(FlareColors.statusError.opacity(0.15), lineWidth: 0.5)
+                                )
                         )
                 }
             }
