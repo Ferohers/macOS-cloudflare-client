@@ -6,8 +6,6 @@
 //
 
 import SwiftUI
-import AppKit
-
 // MARK: - Color Palette
 
 enum FlareColors {
