@@ -68,7 +68,9 @@ struct SidebarView: View {
             }
             .listStyle(.sidebar)
             .tint(FlareColors.cloudflareOrange)
+            .listItemTint(FlareColors.cloudflareOrange)
             .scrollContentBackground(.hidden)
+            .background(Color.clear)
 
             // User info footer
             userFooter
