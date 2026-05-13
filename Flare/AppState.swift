@@ -207,7 +207,7 @@ final class AppState {
                 print("Failed to get user details: \(error)")
             }
 
-            var csvRows = ["User ID,Zone ID,Record ID"]
+            var csvRows = ["User ID,Domain Name,Zone ID,Record Name,Record Type,Record ID"]
             var hadUnauthorizedError = false
 
             for zone in zones {
@@ -218,7 +218,7 @@ final class AppState {
                     do {
                         let (records, info) = try await api.listDNSRecords(zoneId: zone.id, page: page)
                         for record in records {
-                            csvRows.append("\(userId),\(zone.id),\(record.id)")
+                            csvRows.append("\(userId),\(zone.name),\(zone.id),\(record.name),\(record.type),\(record.id)")
                         }
 
                         if let totalPages = info?.total_pages, page < totalPages {
