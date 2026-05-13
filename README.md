@@ -8,6 +8,7 @@ Flare is a high-fidelity, native macOS application built with SwiftUI for managi
 
 - **Zone Management**: View all your Cloudflare zones (domains) at a glance.
 - **DNS Record Editor**: Add, edit, and delete DNS records (A, AAAA, CNAME, TXT, etc.) with support for proxy toggling.
+- **Data Export**: Export account metadata (User ID, Zone ID, Record ID) to CSV for auditing or integration purposes.
 - **Workers Integration**: View and edit your Cloudflare Workers scripts directly within the app.
 - **Native Experience**: Built entirely with SwiftUI, featuring a three-column navigation layout, sidebar, and full dark mode support.
 - **Secure**: Sensitive API tokens are stored securely in the macOS Keychain.

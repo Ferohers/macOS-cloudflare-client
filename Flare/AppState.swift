@@ -30,6 +30,7 @@ final class AppState {
     var isLoadingZones = false
     var isLoadingDNS = false
     var isLoadingWorkers = false
+    var isExporting = false
     var errorMessage: String?
     var successMessage: String?
     
@@ -183,6 +184,58 @@ final class AppState {
         }
 
         isLoadingWorkers = false
+    }
+
+    func exportAccountDataCSV() async {
+        guard let api = api else { return }
+        isExporting = true
+        errorMessage = nil
+
+        do {
+            // Ensure zones are loaded
+            if zones.isEmpty {
+                await loadZones()
+            }
+
+            // Get user details for User ID
+            let user = try await api.getUserDetails()
+            let userId = user.id
+
+            var csvRows = ["User ID,Zone ID,Record ID"]
+
+            for zone in zones {
+                var page = 1
+                var hasMore = true
+
+                while hasMore {
+                    let (records, info) = try await api.listDNSRecords(zoneId: zone.id, page: page)
+                    for record in records {
+                        csvRows.append("\(userId),\(zone.id),\(record.id)")
+                    }
+
+                    if let totalPages = info?.total_pages, page < totalPages {
+                        page += 1
+                    } else {
+                        hasMore = false
+                    }
+                }
+            }
+
+            let csvString = csvRows.joined(separator: "\n")
+            
+            // On macOS, let's copy to clipboard or provide a way to save
+            // For now, let's copy to clipboard and show success
+            await MainActor.run {
+                let pasteboard = NSPasteboard.general
+                pasteboard.clearContents()
+                pasteboard.setString(csvString, forType: .string)
+                self.showSuccess("CSV exported to clipboard!")
+            }
+        } catch {
+            errorMessage = "Export failed: \(error.localizedDescription)"
+        }
+
+        isExporting = false
     }
 
     func getWorkerScript(workerId: String) async throws -> String {

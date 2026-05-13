@@ -184,6 +184,53 @@ struct SettingsView: View {
                     .padding(FlareSpacing.md)
                 }
 
+                // Export section
+                settingsSection("Data Export") {
+                    HStack(spacing: FlareSpacing.md) {
+                        Image(systemName: "tablecells.fill")
+                            .font(.system(size: 13))
+                            .foregroundStyle(FlareColors.textLink)
+                            .frame(width: 24)
+
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Export Account Data")
+                                .font(.system(size: 13, weight: .medium))
+                                .foregroundStyle(FlareColors.textPrimary)
+
+                            Text("Export User ID, Zone IDs, and Record IDs as CSV")
+                                .font(.system(size: 11))
+                                .foregroundStyle(FlareColors.textTertiary)
+                        }
+
+                        Spacer()
+
+                        Button(action: {
+                            Task {
+                                await appState.exportAccountDataCSV()
+                            }
+                        }) {
+                            if appState.isExporting {
+                                ProgressView()
+                                    .controlSize(.small)
+                                    .padding(.horizontal, FlareSpacing.md)
+                            } else {
+                                Text("Export CSV")
+                                    .font(.system(size: 12, weight: .semibold))
+                                    .foregroundStyle(.white)
+                                    .padding(.horizontal, FlareSpacing.md)
+                                    .padding(.vertical, FlareSpacing.sm)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: FlareRadius.md)
+                                            .fill(FlareColors.textLink)
+                                    )
+                            }
+                        }
+                        .buttonStyle(.plain)
+                        .disabled(appState.isExporting)
+                    }
+                    .padding(FlareSpacing.md)
+                }
+
                 // About section
                 settingsSection("About") {
                     settingsRow(
