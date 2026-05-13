@@ -17,7 +17,6 @@ struct ContentView: View {
                     .frame(minWidth: 900, minHeight: 600)
             } else {
                 SetupView()
-                    .frame(width: 520, height: 460)
             }
         }
         .tint(FlareColors.cloudflareOrange)
