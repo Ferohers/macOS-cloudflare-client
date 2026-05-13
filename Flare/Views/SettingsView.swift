@@ -265,30 +265,76 @@ struct SettingsView: View {
 
                 // About section
                 settingsSection("About") {
-                    settingsRow(
-                        icon: "flame.fill",
-                        iconColor: FlareColors.cloudflareOrange,
-                        title: "Flare",
-                        value: "v1.0"
-                    )
+                    VStack(spacing: 0) {
+                        // App identity
+                        HStack(spacing: FlareSpacing.md) {
+                            Image(nsImage: NSImage(named: "AppIcon") ?? NSImage())
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 52, height: 52)
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                                .shadow(color: .black.opacity(0.4), radius: 6, x: 0, y: 3)
 
-                    Divider().background(FlareColors.borderPrimary).padding(.horizontal, FlareSpacing.md)
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Flare")
+                                    .font(.system(size: 15, weight: .bold))
+                                    .foregroundStyle(FlareColors.textPrimary)
+                                Text("Native macOS Cloudflare Dashboard")
+                                    .font(.system(size: 11))
+                                    .foregroundStyle(FlareColors.textSecondary)
+                                Text("v1.0  ·  Built with SwiftUI  ·  Cloudflare API v4")
+                                    .font(.system(size: 10))
+                                    .foregroundStyle(FlareColors.textTertiary)
+                            }
 
-                    settingsRow(
-                        icon: "swift",
-                        iconColor: FlareColors.cloudflareOrangeLight,
-                        title: "Built with",
-                        value: "SwiftUI"
-                    )
+                            Spacer()
+                        }
+                        .padding(FlareSpacing.md)
 
-                    Divider().background(FlareColors.borderPrimary).padding(.horizontal, FlareSpacing.md)
+                        Divider().background(FlareColors.borderPrimary).padding(.horizontal, FlareSpacing.md)
 
-                    settingsRow(
-                        icon: "link",
-                        iconColor: FlareColors.textLink,
-                        title: "API",
-                        value: "Cloudflare v4"
-                    )
+                        // GitHub link
+                        HStack(spacing: FlareSpacing.md) {
+                            Image(systemName: "chevron.left.forwardslash.chevron.right")
+                                .font(.system(size: 13))
+                                .foregroundStyle(FlareColors.textLink)
+                                .frame(width: 24)
+
+                            Text("Open Source")
+                                .font(.system(size: 13, weight: .medium))
+                                .foregroundStyle(FlareColors.textPrimary)
+
+                            Spacer()
+
+                            Link("GitHub →", destination: URL(string: "https://github.com/Ferohers/macOS-cloudflare-client")!)
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundStyle(FlareColors.textLink)
+                        }
+                        .padding(FlareSpacing.md)
+
+                        Divider().background(FlareColors.borderPrimary).padding(.horizontal, FlareSpacing.md)
+
+                        // Privacy statement
+                        HStack(alignment: .top, spacing: FlareSpacing.md) {
+                            Image(systemName: "hand.raised.fill")
+                                .font(.system(size: 13))
+                                .foregroundStyle(FlareColors.statusActive)
+                                .frame(width: 24)
+
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text("Privacy")
+                                    .font(.system(size: 13, weight: .medium))
+                                    .foregroundStyle(FlareColors.textPrimary)
+                                Text("Flare does not collect, transmit, or store any of your data. Your API token is stored exclusively in the macOS Keychain on this device and is never sent to any third-party server.")
+                                    .font(.system(size: 11))
+                                    .foregroundStyle(FlareColors.textSecondary)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+
+                            Spacer()
+                        }
+                        .padding(FlareSpacing.md)
+                    }
                 }
 
                 Spacer(minLength: FlareSpacing.xl)
