@@ -42,6 +42,17 @@ Your Cloudflare API token is stored exclusively in the macOS Keychain on your de
 
 ### Installation
 
+**Downloading the Pre-compiled Release:**
+1. Go to the [Releases](https://github.com/Ferohers/macOS-cloudflare-client/releases) page and download `Flare-macOS-arm64.zip`.
+2. Extract the ZIP archive and move `Flare.app` to your `Applications` folder.
+3. **Important (Unsigned App):** Because this application is currently not signed with an Apple Developer certificate, macOS Gatekeeper will block it from running. You can allow it to run using either of these methods:
+   - **Method 1 (Terminal):** Open your terminal and run the following command to remove the quarantine attribute:
+     ```bash
+     xattr -cr /Applications/Flare.app
+     ```
+   - **Method 2 (Finder):** Right-click (or Control-click) on `Flare.app` in Finder, select **Open** from the context menu, and then click **Open** again in the warning dialog.
+
+**Building from Source:**
 1. Clone the repository:
    ```bash
    git clone https://github.com/Ferohers/macOS-cloudflare-client.git

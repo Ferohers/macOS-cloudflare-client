@@ -1,0 +1,40 @@
+name: Build and Release
+
+on:
+  release:
+    types: [created]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Build the app
+      run: |
+        xcodebuild clean build \
+          -project Flare.xcodeproj \
+          -scheme Flare \
+          -configuration Release \
+          -arch arm64 \
+          ONLY_ACTIVE_ARCH=NO \
+          CODE_SIGN_IDENTITY="" \
+          CODE_SIGNING_REQUIRED=NO \
+          CODE_SIGNING_ALLOWED=NO \
+          BUILD_DIR="${{ github.workspace }}/build"
+
+    - name: Zip the application
+      run: |
+        cd build/Release
+        zip -r Flare-macOS-arm64.zip Flare.app
+
+    - name: Upload Release Asset
+      uses: softprops/action-gh-release@v2
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        files: build/Release/Flare-macOS-arm64.zip
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
