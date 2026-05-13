@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+@MainActor
 @Observable
 final class AppState {
     // Auth
@@ -45,6 +46,10 @@ final class AppState {
     var hasPermissionIssues: Bool {
         permissionStatuses.contains { $0.status == .denied }
     }
+
+    // Task references for alerts
+    private var errorTask: Task<Void, Never>?
+    private var successTask: Task<Void, Never>?
 
     // API
     private(set) var api: CloudflareAPI?
@@ -278,16 +283,14 @@ final class AppState {
             let csvString = csvRows.joined(separator: "\n")
             
             // On macOS, let's copy to clipboard or provide a way to save
-            await MainActor.run {
-                let pasteboard = NSPasteboard.general
-                pasteboard.clearContents()
-                pasteboard.setString(csvString, forType: .string)
-                
-                if hadUnauthorizedError {
-                    self.showError("Exported partial data. Some zones were skipped due to permission error (9109).")
-                } else {
-                    self.showSuccess("CSV exported to clipboard!")
-                }
+            let pasteboard = NSPasteboard.general
+            pasteboard.clearContents()
+            pasteboard.setString(csvString, forType: .string)
+            
+            if hadUnauthorizedError {
+                self.showError("Exported partial data. Some zones were skipped due to permission error (9109).")
+            } else {
+                self.showSuccess("CSV exported to clipboard!")
             }
         } catch {
             errorMessage = "Export failed: \(error.localizedDescription). Please check your API token permissions."
@@ -324,19 +327,25 @@ final class AppState {
         }
     }
     func showSuccess(_ message: String) {
+        successTask?.cancel()
         successMessage = message
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
-            if self?.successMessage == message {
-                self?.successMessage = nil
+        successTask = Task {
+            try? await Task.sleep(nanoseconds: 3_000_000_000)
+            guard !Task.isCancelled else { return }
+            if self.successMessage == message {
+                self.successMessage = nil
             }
         }
     }
 
     func showError(_ message: String) {
+        errorTask?.cancel()
         errorMessage = message
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
-            if self?.errorMessage == message {
-                self?.errorMessage = nil
+        errorTask = Task {
+            try? await Task.sleep(nanoseconds: 3_000_000_000)
+            guard !Task.isCancelled else { return }
+            if self.errorMessage == message {
+                self.errorMessage = nil
             }
         }
     }

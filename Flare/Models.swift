@@ -231,22 +231,35 @@ enum SidebarItem: Hashable {
 
 // MARK: - Helpers
 
+private enum DateFormatters {
+    nonisolated(unsafe) static let isoWithFractionalSeconds: ISO8601DateFormatter = {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return formatter
+    }()
+    
+    nonisolated(unsafe) static let isoStandard: ISO8601DateFormatter = {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime]
+        return formatter
+    }()
+    
+    nonisolated static let displayFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .short
+        return formatter
+    }()
+}
+
 nonisolated private func formatAPIDate(_ dateString: String) -> String {
-    let isoFormatter = ISO8601DateFormatter()
-    isoFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-    if let date = isoFormatter.date(from: dateString) {
-        let displayFormatter = DateFormatter()
-        displayFormatter.dateStyle = .medium
-        displayFormatter.timeStyle = .short
-        return displayFormatter.string(from: date)
+    if let date = DateFormatters.isoWithFractionalSeconds.date(from: dateString) {
+        return DateFormatters.displayFormatter.string(from: date)
     }
+    
     // Fallback: try without fractional seconds
-    isoFormatter.formatOptions = [.withInternetDateTime]
-    if let date = isoFormatter.date(from: dateString) {
-        let displayFormatter = DateFormatter()
-        displayFormatter.dateStyle = .medium
-        displayFormatter.timeStyle = .short
-        return displayFormatter.string(from: date)
+    if let date = DateFormatters.isoStandard.date(from: dateString) {
+        return DateFormatters.displayFormatter.string(from: date)
     }
     return dateString
 }
