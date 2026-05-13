@@ -143,7 +143,7 @@ struct SidebarView: View {
                 Circle()
                     .fill(
                         LinearGradient(
-                            colors: [FlareColors.statusActive, FlareColors.statusActive.opacity(0.8)],
+                            colors: [FlareColors.statusActive, FlareColors.statusActive.opacity(0.5)],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )

@@ -402,7 +402,16 @@ struct GlassFooterModifier: ViewModifier {
                         .fill(.thinMaterial)
 
                     RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                        .fill(FlareColors.cloudflareOrange.opacity(0.15))
+                        .fill(
+                            LinearGradient(
+                                colors: [
+                                    FlareColors.cloudflareOrange.opacity(0.25),
+                                    FlareColors.cloudflareOrange.opacity(0.05)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
 
                     RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                         .strokeBorder(
