@@ -11,6 +11,7 @@ struct SettingsView: View {
     @Environment(AppState.self) private var appState
     @State private var showSignOutAlert = false
     @State private var isHoveringSignOut = false
+    @State private var showPermissionsSheet = false
 
     var body: some View {
         ScrollView {
@@ -77,20 +78,51 @@ struct SettingsView: View {
                                 .font(.system(size: 13, weight: .medium))
                                 .foregroundStyle(FlareColors.textPrimary)
 
-                            Text("Active and connected")
+                            Text(appState.hasPermissionIssues
+                                 ? "Some permissions are missing"
+                                 : "Active and connected")
                                 .font(.system(size: 11))
-                                .foregroundStyle(FlareColors.statusActive)
+                                .foregroundStyle(appState.hasPermissionIssues
+                                                 ? FlareColors.statusWarning
+                                                 : FlareColors.statusActive)
                         }
 
                         Spacer()
 
-                        HStack(spacing: 4) {
-                            Circle()
-                                .fill(FlareColors.statusActive)
-                                .frame(width: 6, height: 6)
-                            Text("Connected")
-                                .font(.system(size: 11, weight: .medium))
-                                .foregroundStyle(FlareColors.statusActive)
+                        // Indicator badge — clickable only when issues exist
+                        Group {
+                            if appState.isCheckingPermissions {
+                                ProgressView()
+                                    .controlSize(.small)
+                            } else if appState.hasPermissionIssues {
+                                Button(action: { showPermissionsSheet = true }) {
+                                    HStack(spacing: 5) {
+                                        Circle()
+                                            .fill(FlareColors.statusWarning)
+                                            .frame(width: 8, height: 8)
+                                        Text("Issues")
+                                            .font(.system(size: 11, weight: .semibold))
+                                            .foregroundStyle(FlareColors.statusWarning)
+                                    }
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 5)
+                                    .background(
+                                        Capsule()
+                                            .fill(FlareColors.statusWarning.opacity(0.12))
+                                            .overlay(Capsule().strokeBorder(FlareColors.statusWarning.opacity(0.4), lineWidth: 1))
+                                    )
+                                }
+                                .buttonStyle(.plain)
+                            } else {
+                                HStack(spacing: 5) {
+                                    Circle()
+                                        .fill(FlareColors.statusActive)
+                                        .frame(width: 8, height: 8)
+                                    Text("Connected")
+                                        .font(.system(size: 11, weight: .semibold))
+                                        .foregroundStyle(FlareColors.statusActive)
+                                }
+                            }
                         }
                     }
                     .padding(FlareSpacing.md)
@@ -263,6 +295,10 @@ struct SettingsView: View {
             }
         }
         .background(FlareColors.bgPrimary)
+        .sheet(isPresented: $showPermissionsSheet) {
+            PermissionsInspectorView()
+                .environment(appState)
+        }
         .alert("Sign Out", isPresented: $showSignOutAlert) {
             Button("Cancel", role: .cancel) {}
             Button("Sign Out", role: .destructive) {

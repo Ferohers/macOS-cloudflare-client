@@ -38,6 +38,14 @@ final class AppState {
     var hiddenZoneIds: Set<String> = []
     var missingPermissions: [String] = []
 
+    // Permission checks
+    var permissionStatuses: [PermissionCheck] = PermissionCheck.allRequired
+    var isCheckingPermissions = false
+
+    var hasPermissionIssues: Bool {
+        permissionStatuses.contains { $0.status == .denied }
+    }
+
     // API
     private(set) var api: CloudflareAPI?
 
@@ -99,6 +107,7 @@ final class AppState {
         accountId = nil
         selectedItem = nil
         errorMessage = nil
+        permissionStatuses = PermissionCheck.allRequired
     }
 
     // MARK: - Data Loading
@@ -112,6 +121,26 @@ final class AppState {
         }
 
         await loadZones()
+        await checkPermissions()
+    }
+
+    func checkPermissions() async {
+        guard let api = api else { return }
+        isCheckingPermissions = true
+
+        var updated = PermissionCheck.allRequired
+
+        for i in updated.indices {
+            do {
+                try await updated[i].probe(api: api, accountId: accountId, zoneId: zones.first?.id)
+                updated[i].status = .granted
+            } catch {
+                updated[i].status = .denied
+            }
+        }
+
+        permissionStatuses = updated
+        isCheckingPermissions = false
     }
 
     func loadZones() async {
