@@ -14,20 +14,7 @@ struct SidebarView: View {
             // Branding header
             brandingHeader
 
-            List(selection: Binding(
-                get: { appState.selectedItem },
-                set: { newItem in
-                    if let item = newItem {
-                        appState.selectedItem = item
-                        if case .worker = item, appState.workers.isEmpty {
-                            Task { await appState.loadWorkers() }
-                        }
-                        if case .zone(let id) = item, let zone = appState.zones.first(where: { $0.id == id }) {
-                            Task { await appState.loadDNSRecords(for: zone) }
-                        }
-                    }
-                }
-            )) {
+            List {
                 Section {
                     let visibleZones = appState.zones.filter { !appState.hiddenZoneIds.contains($0.id) }
                     if appState.isLoadingZones && visibleZones.isEmpty {
@@ -40,9 +27,12 @@ struct SidebarView: View {
                             .font(.system(size: 12))
                     } else {
                         ForEach(visibleZones) { zone in
-                            NavigationLink(value: SidebarItem.zone(zone.id)) {
-                                Label(zone.name, systemImage: "globe")
-                                    .font(.system(size: 12, weight: .regular))
+                            sidebarButton(
+                                title: zone.name,
+                                icon: "globe",
+                                isSelected: appState.selectedItem == .zone(zone.id)
+                            ) {
+                                appState.selectZone(zone)
                             }
                         }
                     }
@@ -64,9 +54,12 @@ struct SidebarView: View {
                             .font(.system(size: 12))
                     } else {
                         ForEach(appState.workers) { worker in
-                            NavigationLink(value: SidebarItem.worker(worker.id)) {
-                                Label(worker.displayName, systemImage: "chevron.left.forwardslash.chevron.right")
-                                    .font(.system(size: 12, weight: .regular))
+                            sidebarButton(
+                                title: worker.displayName,
+                                icon: "chevron.left.forwardslash.chevron.right",
+                                isSelected: appState.selectedItem == .worker(worker.id)
+                            ) {
+                                appState.selectWorker(worker)
                             }
                         }
                     }
@@ -78,9 +71,12 @@ struct SidebarView: View {
                 }
                 
                 Section {
-                    NavigationLink(value: SidebarItem.settings) {
-                        Label("Settings", systemImage: "gearshape")
-                            .font(.system(size: 12, weight: .regular))
+                    sidebarButton(
+                        title: "Settings",
+                        icon: "gearshape",
+                        isSelected: appState.selectedItem == .settings
+                    ) {
+                        appState.selectedItem = .settings
                     }
                 } header: {
                     Text("Preferences")
@@ -90,9 +86,6 @@ struct SidebarView: View {
                 }
             }
             .listStyle(.sidebar)
-            .accentColor(FlareColors.cloudflareOrange)
-            .tint(FlareColors.cloudflareOrange)
-            .listItemTint(FlareColors.cloudflareOrange)
             .scrollContentBackground(.hidden)
             .background(Color.clear)
 
@@ -176,5 +169,48 @@ struct SidebarView: View {
         }
         .padding(.horizontal, FlareSpacing.sm)
         .padding(.vertical, FlareSpacing.sm)
+    }
+
+    // MARK: - Sidebar Row Helper
+    
+    private func sidebarButton(title: String, icon: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: FlareSpacing.sm) {
+                Image(systemName: icon)
+                    .font(.system(size: 13))
+                    .frame(width: 16)
+                
+                Text(title)
+                    .font(.system(size: 12, weight: isSelected ? .semibold : .regular))
+                
+                Spacer()
+            }
+            .foregroundStyle(isSelected ? FlareColors.textPrimary : FlareColors.textSecondary)
+            .padding(.horizontal, FlareSpacing.sm)
+            .padding(.vertical, 6)
+            .background(
+                Group {
+                    if isSelected {
+                        RoundedRectangle(cornerRadius: FlareRadius.md, style: .continuous)
+                            .fill(
+                                LinearGradient(
+                                    colors: [
+                                        FlareColors.cloudflareOrange.opacity(0.25),
+                                        FlareColors.cloudflareOrange.opacity(0.05)
+                                    ],
+                                    startPoint: .bottomLeading,
+                                    endPoint: .topTrailing
+                                )
+                            )
+                            .overlay(
+                                RoundedRectangle(cornerRadius: FlareRadius.md, style: .continuous)
+                                    .strokeBorder(FlareColors.cloudflareOrange.opacity(0.2), lineWidth: 0.5)
+                            )
+                    }
+                }
+            )
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
     }
 }
