@@ -198,25 +198,41 @@ final class AppState {
             }
 
             // Get user details for User ID
-            let user = try await api.getUserDetails()
-            let userId = user.id
+            var userId = "Unknown"
+            do {
+                let user = try await api.getUserDetails()
+                userId = user.id
+            } catch {
+                // If we can't get user details, we might still be able to get zones/records
+                print("Failed to get user details: \(error)")
+            }
 
             var csvRows = ["User ID,Zone ID,Record ID"]
+            var hadUnauthorizedError = false
 
             for zone in zones {
                 var page = 1
                 var hasMore = true
 
                 while hasMore {
-                    let (records, info) = try await api.listDNSRecords(zoneId: zone.id, page: page)
-                    for record in records {
-                        csvRows.append("\(userId),\(zone.id),\(record.id)")
-                    }
+                    do {
+                        let (records, info) = try await api.listDNSRecords(zoneId: zone.id, page: page)
+                        for record in records {
+                            csvRows.append("\(userId),\(zone.id),\(record.id)")
+                        }
 
-                    if let totalPages = info?.total_pages, page < totalPages {
-                        page += 1
-                    } else {
-                        hasMore = false
+                        if let totalPages = info?.total_pages, page < totalPages {
+                            page += 1
+                        } else {
+                            hasMore = false
+                        }
+                    } catch {
+                        if error.localizedDescription.contains("9109") {
+                            hadUnauthorizedError = true
+                            hasMore = false // Skip this zone
+                        } else {
+                            throw error
+                        }
                     }
                 }
             }
@@ -224,15 +240,19 @@ final class AppState {
             let csvString = csvRows.joined(separator: "\n")
             
             // On macOS, let's copy to clipboard or provide a way to save
-            // For now, let's copy to clipboard and show success
             await MainActor.run {
                 let pasteboard = NSPasteboard.general
                 pasteboard.clearContents()
                 pasteboard.setString(csvString, forType: .string)
-                self.showSuccess("CSV exported to clipboard!")
+                
+                if hadUnauthorizedError {
+                    self.showError("Exported partial data. Some zones were skipped due to permission error (9109).")
+                } else {
+                    self.showSuccess("CSV exported to clipboard!")
+                }
             }
         } catch {
-            errorMessage = "Export failed: \(error.localizedDescription)"
+            errorMessage = "Export failed: \(error.localizedDescription). Please check your API token permissions."
         }
 
         isExporting = false
