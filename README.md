@@ -2,7 +2,14 @@
 
 Flare is a high-fidelity, native macOS application built with SwiftUI for managing your Cloudflare resources. It provides a sleek, responsive, and secure interface to monitor and configure your domains, DNS records, and Cloudflare Workers — all from your Mac.
 
-🔗 **Repository**: [github.com/Ferohers/macOS-cloudflare-client](https://github.com/Ferohers/macOS-cloudflare-client)
+🔗 **Repository**: [github.com/Ferohers/macOS-cloudflare-client]
+
+<img width="1812" height="1308" alt="Screenshot 2026-05-13 at 17 36 43" src="https://github.com/user-attachments/assets/bc2b7701-04cc-4cd0-b2be-e90995a4b51c" />
+<img width="1832" height="1340" alt="Screenshot 2026-05-13 at 17 36 35" src="https://github.com/user-attachments/assets/812c63ae-c6f9-4dce-83d7-069ffce1b0c1" />
+<img width="1828" height="1344" alt="Screenshot 2026-05-13 at 17 36 28" src="https://github.com/user-attachments/assets/8c945dca-f053-40de-a258-627ca3a28510" />
+<img width="1088" height="1016" alt="Screenshot 2026-05-13 at 17 36 16" src="https://github.com/user-attachments/assets/36d1af0b-2049-4133-82d3-0ceb4c90a1d5" />
+
+
 
 ## Features
 
