@@ -20,7 +20,6 @@ struct ContentView: View {
                     .frame(width: 520, height: 460)
             }
         }
-        .animation(.easeInOut(duration: 0.3), value: appState.isAuthenticated)
         .tint(FlareColors.cloudflareOrange)
         .accentColor(FlareColors.cloudflareOrange)
     }

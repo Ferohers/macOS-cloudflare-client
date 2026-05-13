@@ -67,52 +67,49 @@ struct SettingsView: View {
 
                 // API Token section
                 settingsSection("API Token") {
-                    HStack(spacing: FlareSpacing.md) {
-                        Image(systemName: "key.fill")
-                            .font(.system(size: 13))
-                            .foregroundStyle(FlareColors.statusActive)
-                            .frame(width: 24)
+                    Button(action: { showPermissionsSheet = true }) {
+                        HStack(spacing: FlareSpacing.md) {
+                            Image(systemName: "key.fill")
+                                .font(.system(size: 13))
+                                .foregroundStyle(FlareColors.statusActive)
+                                .frame(width: 24)
 
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Token Status")
-                                .font(.system(size: 13, weight: .medium))
-                                .foregroundStyle(FlareColors.textPrimary)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Token Status")
+                                    .font(.system(size: 13, weight: .medium))
+                                    .foregroundStyle(FlareColors.textPrimary)
 
-                            Text(appState.hasPermissionIssues
-                                 ? "Some permissions are missing"
-                                 : "Active and connected")
-                                .font(.system(size: 11))
-                                .foregroundStyle(appState.hasPermissionIssues
-                                                 ? FlareColors.statusWarning
-                                                 : FlareColors.statusActive)
-                        }
+                                Text(appState.hasPermissionIssues
+                                     ? "Some permissions are missing — tap to inspect"
+                                     : "Active and connected")
+                                    .font(.system(size: 11))
+                                    .foregroundStyle(appState.hasPermissionIssues
+                                                     ? FlareColors.statusWarning
+                                                     : FlareColors.statusActive)
+                            }
 
-                        Spacer()
+                            Spacer()
 
-                        // Indicator badge — clickable only when issues exist
-                        Group {
+                            // Indicator badge
                             if appState.isCheckingPermissions {
                                 ProgressView()
                                     .controlSize(.small)
                             } else if appState.hasPermissionIssues {
-                                Button(action: { showPermissionsSheet = true }) {
-                                    HStack(spacing: 5) {
-                                        Circle()
-                                            .fill(FlareColors.statusWarning)
-                                            .frame(width: 8, height: 8)
-                                        Text("Issues")
-                                            .font(.system(size: 11, weight: .semibold))
-                                            .foregroundStyle(FlareColors.statusWarning)
-                                    }
-                                    .padding(.horizontal, 10)
-                                    .padding(.vertical, 5)
-                                    .background(
-                                        Capsule()
-                                            .fill(FlareColors.statusWarning.opacity(0.12))
-                                            .overlay(Capsule().strokeBorder(FlareColors.statusWarning.opacity(0.4), lineWidth: 1))
-                                    )
+                                HStack(spacing: 5) {
+                                    Circle()
+                                        .fill(FlareColors.statusWarning)
+                                        .frame(width: 8, height: 8)
+                                    Text("Issues")
+                                        .font(.system(size: 11, weight: .semibold))
+                                        .foregroundStyle(FlareColors.statusWarning)
                                 }
-                                .buttonStyle(.plain)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 5)
+                                .background(
+                                    Capsule()
+                                        .fill(FlareColors.statusWarning.opacity(0.12))
+                                        .overlay(Capsule().strokeBorder(FlareColors.statusWarning.opacity(0.4), lineWidth: 1))
+                                )
                             } else {
                                 HStack(spacing: 5) {
                                     Circle()
@@ -123,9 +120,15 @@ struct SettingsView: View {
                                         .foregroundStyle(FlareColors.statusActive)
                                 }
                             }
+
+                            // Chevron to hint clickability
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 10, weight: .semibold))
+                                .foregroundStyle(FlareColors.textTertiary)
                         }
+                        .padding(FlareSpacing.md)
                     }
-                    .padding(FlareSpacing.md)
+                    .buttonStyle(.plain)
                 }
 
                 // Missing Permissions section
